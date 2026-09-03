@@ -156,16 +156,14 @@ h2.sec:first-of-type{margin-top:18px}
 
 /* ---------- section card: one number per section ---------- */
 .secgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:10px}
-.bandhd{display:flex;align-items:baseline;gap:10px;margin:16px 0 8px;padding:0 2px}
-.bandhd .t{font-weight:700;font-size:15.5px;color:var(--on-ground);letter-spacing:-.01em}
-.bandhd .t .en{display:block;font-size:.76em;font-weight:400;color:var(--on-ground-2);letter-spacing:.01em}
-.bandhd .n{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--on-ground-2);
-  font-variant-numeric:tabular-nums;white-space:nowrap}
 .sc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 12px 12px;
   display:flex;flex-direction:column;gap:9px}
 .sc.filled{border-color:var(--line-strong)}
 .sc.over{border-color:color-mix(in srgb,var(--warn) 55%,transparent)}
 .sc-hd{display:flex;align-items:flex-start;gap:9px}
+.scnum{flex:0 0 auto;width:30px;height:30px;border-radius:8px;background:var(--accent);
+  color:var(--accent-ink);display:grid;place-items:center;font-family:var(--display);
+  font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
 .sc-hd .nm{font-weight:700;font-size:17px;letter-spacing:-.01em}
 .sc-hd .sub{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--ink-2);text-transform:uppercase}
 .sc-pc{margin-left:auto;flex:0 0 auto;text-align:right;font-family:var(--mono);font-size:13px;color:var(--ink-2);
@@ -219,6 +217,8 @@ details.fold>.fb{padding:12px 13px 13px;border-top:1px solid var(--line)}
   font-family:var(--mono);font-size:8px;line-height:14px;text-align:center;
   box-shadow:inset 0 0 0 1px var(--tick);font-variant-numeric:tabular-nums}
 .tpseat:hover{box-shadow:inset 0 0 0 1.5px var(--ink)}
+.tpnum{display:grid;place-items:center;font-family:var(--display);font-weight:700;
+  letter-spacing:-.03em;pointer-events:none;z-index:2;line-height:1}
 .tprl{font-family:var(--mono);font-size:9.5px;font-weight:500;color:var(--ink-2);
   line-height:14px;text-align:center}
 .tplab{font-size:9.5px;color:var(--ink-2);line-height:14px;white-space:nowrap;
@@ -364,92 +364,58 @@ pre.out{background:var(--sunken);border:1px solid var(--line);border-radius:8px;
    ============================================================ */
 const CAP_TOTAL = 1176;
 
-function rws(letters, cap){ return letters.split(" ").map(L => [L, cap]); }
+const PLAN = {"l1":{"r0":6,"r1":46,"c0":1,"c1":51,"rows":[[18,"A",[[2,43,5,"S1"],[8,38,4,"S1"],[14,34,14,"S2"],[30,20,14,"S3"]]],[19,"B",[[2,43,5,"S1"],[8,38,4,"S1"],[14,34,14,"S2"],[30,20,14,"S3"],[46,6,6,"S4"]]],[20,"C",[[2,43,3,"S1"],[8,38,4,"S1"],[14,34,14,"S2"],[30,20,14,"S3"],[46,6,6,"S4"]]],[21,"D",[[2,44,3,"S1"],[7,39,5,"S1"],[14,34,14,"S2"],[30,20,14,"S3"]]],[22,"E",[[2,44,10,"S1"],[14,34,14,"S2"],[30,20,14,"S3"]]],[23,"F",[[2,44,10,"S1"],[14,34,14,"S2"],[30,20,14,"S3"]]],[26,"G",[[2,44,3,"S5"],[7,39,5,"S5"],[14,34,14,"S7"],[30,20,14,"S8"]]],[27,"H",[[2,44,10,"S5"],[14,34,14,"S7"],[30,20,14,"S8"]]],[28,"J",[[14,34,14,"S7"],[30,20,14,"S8"]]],[29,"K",[[14,34,14,"S7"],[30,20,14,"S8"]]],[30,"L",[[14,34,14,"S7"],[30,20,14,"S8"]]],[31,"M",[[14,34,14,"S7"],[30,20,14,"S8"],[46,6,6,"S15"]]],[32,"N",[[2,44,10,"S6"],[14,34,14,"S7"],[30,20,14,"S8"],[46,6,6,"S15"]]],[33,"P",[[2,44,10,"S6"],[14,34,14,"S7"],[30,20,14,"S8"],[46,6,6,"S15"]]],[34,"Q",[[2,44,10,"S6"],[14,34,14,"S7"],[30,20,14,"S8"],[46,6,6,"S15"]]],[35,"R",[[2,44,2,"S6"],[7,39,5,"S6"],[14,34,14,"S7"],[30,20,14,"S8"],[46,6,6,"S15"]]],[36,"S",[[2,44,10,"S6"],[14,34,14,"S7"],[30,20,14,"S8"],[46,6,6,"S15"]]],[37,"T",[[2,44,10,"S6"],[14,34,14,"S7"],[30,20,14,"S8"],[46,6,6,"S15"]]],[38,"U",[[46,6,6,"S15"]]],[39,"V",[[15,28,3,"S9"],[19,25,4,"S10"],[24,21,4,"S11"],[30,17,4,"S12"],[35,13,4,"S13"],[40,9,3,"S14"],[46,6,6,"S15"]]],[40,"W",[[15,28,3,"S9"],[19,25,4,"S10"],[24,21,4,"S11"],[30,17,4,"S12"],[35,13,4,"S13"],[40,9,3,"S14"],[46,6,6,"S15"]]],[41,"X",[[15,28,3,"S9"],[19,25,4,"S10"],[24,21,4,"S11"],[30,17,4,"S12"],[35,13,4,"S13"],[40,9,3,"S14"],[46,6,6,"S15"]]],[42,"Y",[[15,28,3,"S9"],[19,25,4,"S10"],[24,21,4,"S11"],[30,17,4,"S12"],[35,13,4,"S13"],[40,9,3,"S14"],[46,6,6,"S15"]]],[43,"Z",[[46,6,6,"S15"]]],[45,"Z",[[15,26,13,"S16"],[31,13,13,"S17"]]]],"labels":[[7,30,"Baptism pool",1,1,0],[12,27,"Stage",1,1,0],[18,1,"A",1,1,1],[18,13,"A",1,1,1],[18,29,"A",1,1,1],[19,1,"B",1,1,1],[19,13,"B",1,1,1],[19,29,"B",1,1,1],[19,45,"B",1,1,1],[20,1,"C",1,1,1],[20,13,"C",1,1,1],[20,29,"C",1,1,1],[20,45,"C",1,1,1],[21,1,"D",1,1,1],[21,13,"D",1,1,1],[21,29,"D",1,1,1],[22,1,"E",1,1,1],[22,13,"E",1,1,1],[22,29,"E",1,1,1],[23,1,"F",1,1,1],[23,13,"F",1,1,1],[23,29,"F",1,1,1],[26,1,"G",1,1,1],[26,13,"G",1,1,1],[26,29,"G",1,1,1],[27,1,"H",1,1,1],[27,13,"H",1,1,1],[27,29,"H",1,1,1],[28,13,"J",1,1,1],[28,29,"J",1,1,1],[28,45,"Main Entrance",1,1,0],[29,5,"sound console",1,1,0],[29,13,"K",1,1,1],[29,29,"K",1,1,1],[30,13,"L",1,1,1],[30,29,"L",1,1,1],[31,13,"M",1,1,1],[31,29,"M",1,1,1],[31,45,"M",1,1,1],[32,1,"N",1,1,1],[32,13,"N",1,1,1],[32,29,"N",1,1,1],[32,45,"N",1,1,1],[33,1,"P",1,1,1],[33,13,"P",1,1,1],[33,29,"P",1,1,1],[33,45,"P",1,1,1],[34,1,"Q",1,1,1],[34,13,"Q",1,1,1],[34,29,"Q",1,1,1],[34,45,"Q",1,1,1],[35,1,"R",1,1,1],[35,13,"R",1,1,1],[35,29,"R",1,1,1],[35,45,"R",1,1,1],[36,1,"S",1,1,1],[36,13,"S",1,1,1],[36,29,"S",1,1,1],[36,45,"S",1,1,1],[37,1,"T",1,1,1],[37,13,"T",1,1,1],[37,29,"T",1,1,1],[37,45,"T",1,1,1],[38,45,"U",1,1,1],[39,13,"V",1,1,1],[39,14,"wall",1,4,0],[39,23,"wall",1,4,0],[39,34,"wall",1,4,0],[39,43,"wall",1,4,0],[39,44,"V",1,1,1],[39,45,"V",1,1,1],[40,13,"W",1,1,1],[40,44,"W",1,1,1],[40,45,"W",1,1,1],[41,13,"X",1,1,1],[41,44,"X",1,1,1],[41,45,"X",1,1,1],[42,13,"Y",1,1,1],[42,44,"Y",1,1,1],[42,45,"Y",1,1,1],[43,4,"Room 101",1,1,0],[43,45,"Z",1,1,1],[45,14,"Z",1,1,1],[45,44,"Z",1,1,1]],"boxes":{"S1":[18,23,2,11],"S2":[18,23,14,27],"S3":[18,23,30,43],"S4":[19,20,46,51],"S5":[26,27,2,11],"S7":[26,37,14,27],"S8":[26,37,30,43],"S15":[31,43,46,51],"S6":[32,37,2,11],"S9":[39,42,15,17],"S10":[39,42,19,22],"S11":[39,42,24,27],"S12":[39,42,30,33],"S13":[39,42,35,38],"S14":[39,42,40,42],"S16":[45,45,15,27],"S17":[45,45,31,43]}},"l2":{"r0":53,"r1":70,"c0":1,"c1":47,"rows":[[57,"A",[[7,36,10,"S18"],[19,26,15,"S19"],[36,11,11,"S20"]]],[58,"B",[[7,36,10,"S18"],[19,26,15,"S19"],[36,11,11,"S20"]]],[59,"C",[[7,36,10,"S18"],[19,26,15,"S19"],[36,11,11,"S20"]]],[60,"D",[[7,36,10,"S18"],[19,26,15,"S19"],[36,11,11,"S20"]]],[61,"E",[[7,36,10,"S18"],[19,26,15,"S19"],[36,11,11,"S20"]]],[64,"F",[[7,32,16,"S21"],[31,16,16,"S22"]]],[65,"G",[[7,32,16,"S21"],[31,16,16,"S22"]]],[66,"H",[[7,32,16,"S21"],[31,16,16,"S22"]]],[67,"J",[[7,32,16,"S21"],[31,16,16,"S22"]]],[68,"K",[[7,32,16,"S21"],[31,16,16,"S22"]]]],"labels":[[57,6,"A",1,1,1],[57,18,"A",1,1,1],[57,35,"A",1,1,1],[58,6,"B",1,1,1],[58,18,"B",1,1,1],[58,35,"B",1,1,1],[59,6,"C",1,1,1],[59,18,"C",1,1,1],[59,35,"C",1,1,1],[60,6,"D",1,1,1],[60,18,"D",1,1,1],[60,35,"D",1,1,1],[61,6,"E",1,1,1],[61,18,"E",1,1,1],[61,35,"E",1,1,1],[64,6,"F",1,1,1],[64,47,"F",1,1,1],[65,6,"G",1,1,1],[65,47,"G",1,1,1],[66,6,"H",1,1,1],[66,47,"H",1,1,1],[67,6,"J",1,1,1],[67,47,"J",1,1,1],[68,6,"K",1,1,1],[68,47,"K",1,1,1],[70,28,"Main Entrance",1,1,0]],"boxes":{"S18":[57,61,7,16],"S19":[57,61,19,33],"S20":[57,61,36,46],"S21":[64,68,7,22],"S22":[64,68,31,46]}}};
+const SECCAP = {"S1":53,"S2":84,"S3":84,"S4":12,"S5":18,"S7":168,"S8":168,"S15":78,"S6":57,"S9":12,"S10":16,"S11":16,"S12":16,"S13":16,"S14":12,"S16":13,"S17":13,"S18":50,"S19":75,"S20":55,"S21":80,"S22":80};
 
-/* Per-row seat counts, by seating block. Kept because the floor map is
-   drawn from them and every section capacity is derived from them —
-   one source of truth for the seat figures. */
-const BLOCKROWS = {
-  left:   [["A",9],["B",9],["C",7],["D",8],["E",10],["F",10],["G",8],["H",10],
-           ["N",10],["P",10],["Q",10],["R",7],["S",10],["T",10]],
-  cleft:  rws("A B C D E F G H J K L M N P Q R S T",14).concat(rws("V W X Y",11)),
-  cright: rws("A B C D E F G H J K L M N P Q R S T",14).concat(rws("V W X Y",11)),
-  right:  rws("B C M N P Q R S T U V W X Y Z",6),
-  zrow:   [["Z-L",13],["Z-R",13]],
-  l2left: rws("A B C D E",10).concat(rws("F G H J K",16)),
-  l2mid:  rws("A B C D E",15),
-  l2right:rws("A B C D E",11).concat(rws("F G H J K",16))
-};
-function blockRowCap(block, label){
-  const r = (BLOCKROWS[block] || []).find(x => x[0] === label);
-  return r ? r[1] : 0;
-}
-
-/* One number per section. A section is one row-band within one seating
-   block, and the bands line up across every block so "A-F" means the same
-   place wherever the usher looks. Band edges are the real cross-aisles in
-   the plan. */
-const BANDS = {
-  1:{zh:"A–F 排 · 讲台前第一区", en:"Rows A–F · front, before the cross aisle"},
-  2:{zh:"G–T 排 · 中间大区",     en:"Rows G–T · the middle mass"},
-  3:{zh:"V–Z 排 · 二楼看台下方", en:"Rows V–Z · under the balcony"},
-  4:{zh:"二楼 A–E 排",          en:"Upper level · rows A–E"},
-  5:{zh:"二楼 F–K 排",          en:"Upper level · rows F–K"}
-};
+/* The sections ARE the boxes drawn on the floor plan, numbered as Pastor Owh
+   marked them: 1-17 on the main floor, 18-22 upstairs. Capacities come from
+   SECCAP above, generated from the workbook, so nothing here is hand-typed. */
 const SECTIONS = [
-  // Band 1 — rows A–F
-  {key:"B1-L",  band:1, lv:"L1", zh:"A–F 左区",   en:"A–F · Left",         parts:[["left","A B C D E F"]]},
-  {key:"B1-CL", band:1, lv:"L1", zh:"A–F 中左区", en:"A–F · Centre-left",  parts:[["cleft","A B C D E F"]]},
-  {key:"B1-CR", band:1, lv:"L1", zh:"A–F 中右区", en:"A–F · Centre-right", parts:[["cright","A B C D E F"]]},
-  {key:"B1-R",  band:1, lv:"L1", zh:"B–C 右侧区", en:"B–C · Right side",   parts:[["right","B C"]]},
-  // Band 2 — rows G–T (the left block has no J–M; that is the sound console)
-  {key:"B2-L",  band:2, lv:"L1", zh:"G–T 左区",   en:"G–T · Left",         parts:[["left","G H N P Q R S T"]]},
-  {key:"B2-CL", band:2, lv:"L1", zh:"G–T 中左区", en:"G–T · Centre-left",  parts:[["cleft","G H J K L M N P Q R S T"]]},
-  {key:"B2-CR", band:2, lv:"L1", zh:"G–T 中右区", en:"G–T · Centre-right", parts:[["cright","G H J K L M N P Q R S T"]]},
-  {key:"B2-R",  band:2, lv:"L1", zh:"M–T 右侧区", en:"M–T · Right side",   parts:[["right","M N P Q R S T"]]},
-  // Band 3 — rows V–Z, tucked under the balcony (row Z spans the centre)
-  {key:"B3-CL", band:3, lv:"L1", zh:"V–Z 中左区", en:"V–Z · Centre-left",  parts:[["cleft","V W X Y"],["zrow","Z-L"]]},
-  {key:"B3-CR", band:3, lv:"L1", zh:"V–Z 中右区", en:"V–Z · Centre-right", parts:[["cright","V W X Y"],["zrow","Z-R"]]},
-  {key:"B3-R",  band:3, lv:"L1", zh:"U–Z 右侧区", en:"U–Z · Right side",   parts:[["right","U V W X Y Z"]]},
-  // Level 2 — band A–E across all three blocks, then F–K either side of the stairs
-  {key:"L2A-L", band:4, lv:"L2", zh:"二楼 A–E 左区", en:"Upper A–E · Left",   parts:[["l2left","A B C D E"]]},
-  {key:"L2A-C", band:4, lv:"L2", zh:"二楼 A–E 中区", en:"Upper A–E · Centre", parts:[["l2mid","A B C D E"]]},
-  {key:"L2A-R", band:4, lv:"L2", zh:"二楼 A–E 右区", en:"Upper A–E · Right",  parts:[["l2right","A B C D E"]]},
-  {key:"L2B-L", band:5, lv:"L2", zh:"二楼 F–K 左区", en:"Upper F–K · Left",   parts:[["l2left","F G H J K"]]},
-  {key:"L2B-R", band:5, lv:"L2", zh:"二楼 F–K 右区", en:"Upper F–K · Right",  parts:[["l2right","F G H J K"]]}
+  {key:"S1",  n:1,  pass:1, lv:"L1", zh:"左区 A–F",        en:"Left · rows A–F"},
+  {key:"S2",  n:2,  pass:1, lv:"L1", zh:"中左区 A–F",      en:"Centre-left · rows A–F"},
+  {key:"S3",  n:3,  pass:1, lv:"L1", zh:"中右区 A–F",      en:"Centre-right · rows A–F"},
+  {key:"S4",  n:4,  pass:1, lv:"L1", zh:"右侧区 B–C",      en:"Right side · rows B–C"},
+  {key:"S5",  n:5,  pass:1, lv:"L1", zh:"左区 G–H",        en:"Left · rows G–H"},
+  {key:"S6",  n:6,  pass:1, lv:"L1", zh:"左区 N–T",        en:"Left · rows N–T"},
+  {key:"S7",  n:7,  pass:1, lv:"L1", zh:"中左区 G–T",      en:"Centre-left · rows G–T"},
+  {key:"S8",  n:8,  pass:1, lv:"L1", zh:"中右区 G–T",      en:"Centre-right · rows G–T"},
+  {key:"S9",  n:9,  pass:2, lv:"L1", zh:"中左 V–Y 座号 28–26", en:"Centre-left pod · seats 28–26"},
+  {key:"S10", n:10, pass:2, lv:"L1", zh:"中左 V–Y 座号 25–22", en:"Centre-left pod · seats 25–22"},
+  {key:"S11", n:11, pass:2, lv:"L1", zh:"中左 V–Y 座号 21–18", en:"Centre-left pod · seats 21–18"},
+  {key:"S12", n:12, pass:2, lv:"L1", zh:"中右 V–Y 座号 17–14", en:"Centre-right pod · seats 17–14"},
+  {key:"S13", n:13, pass:2, lv:"L1", zh:"中右 V–Y 座号 13–10", en:"Centre-right pod · seats 13–10"},
+  {key:"S14", n:14, pass:2, lv:"L1", zh:"中右 V–Y 座号 9–7",   en:"Centre-right pod · seats 9–7"},
+  {key:"S15", n:15, pass:2, lv:"L1", zh:"右侧区 M–Z",      en:"Right side · rows M–Z"},
+  {key:"S16", n:16, pass:2, lv:"L1", zh:"最后一排 Z 左半",  en:"Back row Z · left half"},
+  {key:"S17", n:17, pass:2, lv:"L1", zh:"最后一排 Z 右半",  en:"Back row Z · right half"},
+  {key:"S18", n:18, pass:3, lv:"L2", zh:"二楼 左区 A–E",    en:"Upper left · rows A–E"},
+  {key:"S19", n:19, pass:3, lv:"L2", zh:"二楼 中区 A–E",    en:"Upper centre · rows A–E"},
+  {key:"S20", n:20, pass:3, lv:"L2", zh:"二楼 右区 A–E",    en:"Upper right · rows A–E"},
+  {key:"S21", n:21, pass:3, lv:"L2", zh:"二楼 左区 F–K",    en:"Upper left · rows F–K"},
+  {key:"S22", n:22, pass:3, lv:"L2", zh:"二楼 右区 F–K",    en:"Upper right · rows F–K"}
 ];
 const SMAP = {};
-SECTIONS.forEach(sec => {
-  sec.cap = sec.parts.reduce((t,[block,labels]) =>
-    t + labels.split(" ").reduce((a,L) => a + blockRowCap(block, L), 0), 0);
-  SMAP[sec.key] = sec;
-});
+SECTIONS.forEach(sec => { sec.cap = SECCAP[sec.key]; SMAP[sec.key] = sec; });
 const capOf = k => SMAP[k].cap;
-
-/* (block,row) -> section key, for drawing the floor map. */
-const ROW2SEC = {};
-SECTIONS.forEach(sec => sec.parts.forEach(([block,labels]) =>
-  labels.split(" ").forEach(L => { (ROW2SEC[block] = ROW2SEC[block] || {})[L] = sec.key; })));
+function passOf(sec){ return sec.pass; }
 
 const PASSES = [
   {n:1,
    zh:"第一遍 · 在二楼看台点算一楼",
    en:"Pass 1 · Count Level 1 from the balcony",
-   tzh:"站在二楼栏杆旁，一带一带往下数。用计数器数完一区，把数字填进那一区的格子。",
-   ten:"Stand at the balcony rail and work down one band at a time. Click through a section, then type the number into its box."},
+   tzh:"站在二楼栏杆旁，按 1 到 8 的顺序数。用计数器数完一区，把数字填进那一区的格子。",
+   ten:"Stand at the balcony rail and work through sections 1 to 8 in order. Click through a section, then type the number into its box."},
   {n:2,
    zh:"第二遍 · 走到一楼后方点算",
    en:"Pass 2 · Walk to the rear of Level 1",
-   tzh:"V–Z 那一带在二楼看台正下方，从上面看不见。讲道中走下去，靠近那三区数。",
-   ten:"Band V–Z sits directly under the balcony and cannot be seen from above. Walk down during the sermon and count those three sections up close."},
+   tzh:"9 到 17 区在二楼看台正下方，从上面看不见。讲道中走下去，靠近它们数。",
+   ten:"Sections 9 to 17 sit under the balcony and cannot be seen from above. Walk down during the sermon and count them up close."},
   {n:3,
    zh:"第三遍 · 二楼（你站的这一层）",
    en:"Pass 3 · Level 2, where you're standing",
-   tzh:"回到二楼数这一层。就在你眼前，最容易，留到最后做。",
-   ten:"Back upstairs, count this level. It's right in front of you — the easiest, so leave it for last."}
+   tzh:"回到二楼数 18 到 22 区。就在你眼前，最容易，留到最后做。",
+   ten:"Back upstairs, count sections 18 to 22. They are right in front of you — the easiest, so leave them for last."}
 ];
-// Band 3 is the strip under the balcony, so it is the walk-down pass.
-function passOf(sec){ return sec.lv === "L2" ? 3 : (sec.band === 3 ? 2 : 1); }
 
 const EXTRAS = [
   {key:"child",   zh:"儿童主日学",        en:"Children's church"},
@@ -460,8 +426,8 @@ const EXTRAS = [
 ];
 
 /* ============================================================ */
-const STORE = "coos-count-v4";
-const OLD_STORE = "coos-count-v3";
+const STORE = "coos-count-v5";
+const OLD_STORE = "coos-count-v4";
 const SERVICES_DEFAULT = ["主日华语崇拜 2:00pm · Sunday Chinese Service"];
 const todayISO = () => new Date().toLocaleDateString("en-CA");
 
@@ -476,11 +442,10 @@ function freshDraft(keepSvc, keepBy){
    visible at a glance. Banner-marked, and one tap clears it. */
 function demoDraft(){
   const c = blankCounts();
-  c["B1-L"]  = 38; c["B1-CL"] = 71;  c["B1-CR"] = 68;  c["B1-R"] = 7;
-  c["B2-L"]  = 52; c["B2-CL"] = 132; c["B2-CR"] = 126; c["B2-R"] = 24;
-  c["B3-CL"] = 21; c["B3-CR"] = 18;  c["B3-R"]  = 11;
-  c["L2A-L"] = 31; c["L2A-C"] = 44;  c["L2A-R"] = 33;
-  c["L2B-L"] = 26; c["L2B-R"] = 22;
+  const d = {S1:38,S2:71,S3:68,S4:7,S5:12,S6:40,S7:132,S8:126,
+             S9:6,S10:9,S11:11,S12:10,S13:8,S14:5,S15:41,S16:9,S17:7,
+             S18:31,S19:44,S20:33,S21:26,S22:22};
+  Object.keys(d).forEach(k => { c[k] = d[k]; });
   const e = blankExtras();
   e.child = 62; e.nursery = 11; e.serving = 24; e.standing = 0; e.online = 138;
   return {date:todayISO(), svc:SERVICES_DEFAULT[0], time:"14:45", by:"",
@@ -649,9 +614,10 @@ function secCard(sec){
   const over = v != null && v > cap;
   return `<div class="sc ${v != null ? "filled" : ""} ${over ? "over" : ""}">
     <div class="sc-hd">
+      <div class="scnum">${sec.n}</div>
       <div class="bi" style="flex:1">
         <div class="nm"><span class="zh">${sec.zh}</span><span class="en">${sec.en}</span></div>
-        <div class="sub">${sec.key} · ${cap} ${S.lang === "en" ? "seats" : "座"}</div>
+        <div class="sub">${cap} ${S.lang === "en" ? "seats" : "座"}</div>
       </div>
       <div class="sc-pc">${v == null ? "—" : Math.round(v / cap * 100) + "%"}</div>
     </div>
@@ -693,26 +659,12 @@ function viewCount(){
       <div class="pbar"><i style="width:${cap ? Math.min(100, sum / cap * 100) : 0}%"></i></div>
       <div class="chiprow">
         <span class="chip ${ss.length && done === ss.length ? "done" : "todo"}">${done}/${ss.length} ${S.lang === "en" ? "sections filled" : "区已填"}</span>
+        <span class="chip">${S.lang === "en" ? "sections" : "第"} ${ss[0].n}–${ss[ss.length - 1].n}${S.lang === "en" ? "" : " 区"}</span>
         <span class="chip">${cap ? Math.round(sum / cap * 100) : 0}%</span>
       </div>`;
-    if(!ss.length){
-      h += `<div class="emptypass">${bi("这一遍目前没有区域。按其他区的「看不见」可以把它移到这里。",
-        "Nothing in this pass right now. Tap “Hidden” on a section to move it here.")}</div>`;
-    } else {
-      // Sections are grouped by band, so the usher counts one horizontal
-      // strip of the room at a time instead of hopping around.
-      const bandIds = [];
-      ss.forEach(sec => { if(bandIds.indexOf(sec.band) < 0) bandIds.push(sec.band); });
-      bandIds.forEach(bid => {
-        const bs = ss.filter(sec => sec.band === bid);
-        const bcap = bs.reduce((t,x) => t + x.cap, 0);
-        const bsum = bs.reduce((t,x) => t + (secVal(x.key) || 0), 0);
-        h += `<div class="bandhd">
-          <span class="t"><span class="zh">${BANDS[bid].zh}</span><span class="en">${BANDS[bid].en}</span></span>
-          <span class="n">${bsum} / ${bcap}</span></div>`;
-        h += `<div class="secgrid">` + bs.map(secCard).join("") + `</div>`;
-      });
-    }
+    h += ss.length
+      ? `<div class="secgrid">` + ss.map(secCard).join("") + `</div>`
+      : `<div class="emptypass">${bi("这一遍没有区域。","Nothing in this pass.")}</div>`;
     h += `</div>`;
   });
 
@@ -759,7 +711,6 @@ function mergeCode(txt){
 /* ============================================================
    FLOOR MAP — real row geometry, tinted by each section's fill
    ============================================================ */
-const PLAN = {"l1":{"r0":6,"r1":46,"c0":1,"c1":51,"rows":[[18,"A",[[2,43,5,"B1-L"],[8,38,4,"B1-L"],[14,34,14,"B1-CL"],[30,20,14,"B1-CR"]]],[19,"B",[[2,43,5,"B1-L"],[8,38,4,"B1-L"],[14,34,14,"B1-CL"],[30,20,14,"B1-CR"],[46,6,6,"B1-R"]]],[20,"C",[[2,43,3,"B1-L"],[8,38,4,"B1-L"],[14,34,14,"B1-CL"],[30,20,14,"B1-CR"],[46,6,6,"B1-R"]]],[21,"D",[[2,44,3,"B1-L"],[7,39,5,"B1-L"],[14,34,14,"B1-CL"],[30,20,14,"B1-CR"]]],[22,"E",[[2,44,10,"B1-L"],[14,34,14,"B1-CL"],[30,20,14,"B1-CR"]]],[23,"F",[[2,44,10,"B1-L"],[14,34,14,"B1-CL"],[30,20,14,"B1-CR"]]],[26,"G",[[2,44,3,"B2-L"],[7,39,5,"B2-L"],[14,34,14,"B2-CL"],[30,20,14,"B2-CR"]]],[27,"H",[[2,44,10,"B2-L"],[14,34,14,"B2-CL"],[30,20,14,"B2-CR"]]],[28,"J",[[14,34,14,"B2-CL"],[30,20,14,"B2-CR"]]],[29,"K",[[14,34,14,"B2-CL"],[30,20,14,"B2-CR"]]],[30,"L",[[14,34,14,"B2-CL"],[30,20,14,"B2-CR"]]],[31,"M",[[14,34,14,"B2-CL"],[30,20,14,"B2-CR"],[46,6,6,"B2-R"]]],[32,"N",[[2,44,10,"B2-L"],[14,34,14,"B2-CL"],[30,20,14,"B2-CR"],[46,6,6,"B2-R"]]],[33,"P",[[2,44,10,"B2-L"],[14,34,14,"B2-CL"],[30,20,14,"B2-CR"],[46,6,6,"B2-R"]]],[34,"Q",[[2,44,10,"B2-L"],[14,34,14,"B2-CL"],[30,20,14,"B2-CR"],[46,6,6,"B2-R"]]],[35,"R",[[2,44,2,"B2-L"],[7,39,5,"B2-L"],[14,34,14,"B2-CL"],[30,20,14,"B2-CR"],[46,6,6,"B2-R"]]],[36,"S",[[2,44,10,"B2-L"],[14,34,14,"B2-CL"],[30,20,14,"B2-CR"],[46,6,6,"B2-R"]]],[37,"T",[[2,44,10,"B2-L"],[14,34,14,"B2-CL"],[30,20,14,"B2-CR"],[46,6,6,"B2-R"]]],[38,"U",[[46,6,6,"B3-R"]]],[39,"V",[[15,28,3,"B3-CL"],[19,25,4,"B3-CL"],[24,21,4,"B3-CL"],[30,17,4,"B3-CR"],[35,13,4,"B3-CR"],[40,9,3,"B3-CR"],[46,6,6,"B3-R"]]],[40,"W",[[15,28,3,"B3-CL"],[19,25,4,"B3-CL"],[24,21,4,"B3-CL"],[30,17,4,"B3-CR"],[35,13,4,"B3-CR"],[40,9,3,"B3-CR"],[46,6,6,"B3-R"]]],[41,"X",[[15,28,3,"B3-CL"],[19,25,4,"B3-CL"],[24,21,4,"B3-CL"],[30,17,4,"B3-CR"],[35,13,4,"B3-CR"],[40,9,3,"B3-CR"],[46,6,6,"B3-R"]]],[42,"Y",[[15,28,3,"B3-CL"],[19,25,4,"B3-CL"],[24,21,4,"B3-CL"],[30,17,4,"B3-CR"],[35,13,4,"B3-CR"],[40,9,3,"B3-CR"],[46,6,6,"B3-R"]]],[43,"Z",[[46,6,6,"B3-R"]]],[45,"Z",[[15,26,13,"B3-CL"],[31,13,13,"B3-CR"]]]],"labels":[[7,30,"Baptism pool",1,1,0],[12,27,"Stage",1,1,0],[18,1,"A",1,1,1],[18,13,"A",1,1,1],[18,29,"A",1,1,1],[19,1,"B",1,1,1],[19,13,"B",1,1,1],[19,29,"B",1,1,1],[19,45,"B",1,1,1],[20,1,"C",1,1,1],[20,13,"C",1,1,1],[20,29,"C",1,1,1],[20,45,"C",1,1,1],[21,1,"D",1,1,1],[21,13,"D",1,1,1],[21,29,"D",1,1,1],[22,1,"E",1,1,1],[22,13,"E",1,1,1],[22,29,"E",1,1,1],[23,1,"F",1,1,1],[23,13,"F",1,1,1],[23,29,"F",1,1,1],[26,1,"G",1,1,1],[26,13,"G",1,1,1],[26,29,"G",1,1,1],[27,1,"H",1,1,1],[27,13,"H",1,1,1],[27,29,"H",1,1,1],[28,13,"J",1,1,1],[28,29,"J",1,1,1],[28,45,"Main Entrance",1,1,0],[29,5,"sound console",1,1,0],[29,13,"K",1,1,1],[29,29,"K",1,1,1],[30,13,"L",1,1,1],[30,29,"L",1,1,1],[31,13,"M",1,1,1],[31,29,"M",1,1,1],[31,45,"M",1,1,1],[32,1,"N",1,1,1],[32,13,"N",1,1,1],[32,29,"N",1,1,1],[32,45,"N",1,1,1],[33,1,"P",1,1,1],[33,13,"P",1,1,1],[33,29,"P",1,1,1],[33,45,"P",1,1,1],[34,1,"Q",1,1,1],[34,13,"Q",1,1,1],[34,29,"Q",1,1,1],[34,45,"Q",1,1,1],[35,1,"R",1,1,1],[35,13,"R",1,1,1],[35,29,"R",1,1,1],[35,45,"R",1,1,1],[36,1,"S",1,1,1],[36,13,"S",1,1,1],[36,29,"S",1,1,1],[36,45,"S",1,1,1],[37,1,"T",1,1,1],[37,13,"T",1,1,1],[37,29,"T",1,1,1],[37,45,"T",1,1,1],[38,45,"U",1,1,1],[39,13,"V",1,1,1],[39,14,"wall",1,4,0],[39,23,"wall",1,4,0],[39,34,"wall",1,4,0],[39,43,"wall",1,4,0],[39,44,"V",1,1,1],[39,45,"V",1,1,1],[40,13,"W",1,1,1],[40,44,"W",1,1,1],[40,45,"W",1,1,1],[41,13,"X",1,1,1],[41,44,"X",1,1,1],[41,45,"X",1,1,1],[42,13,"Y",1,1,1],[42,44,"Y",1,1,1],[42,45,"Y",1,1,1],[43,4,"Room 101",1,1,0],[43,45,"Z",1,1,1],[45,14,"Z",1,1,1],[45,44,"Z",1,1,1]]},"l2":{"r0":53,"r1":70,"c0":1,"c1":47,"rows":[[57,"A",[[7,36,10,"L2A-L"],[19,26,15,"L2A-C"],[36,11,11,"L2A-R"]]],[58,"B",[[7,36,10,"L2A-L"],[19,26,15,"L2A-C"],[36,11,11,"L2A-R"]]],[59,"C",[[7,36,10,"L2A-L"],[19,26,15,"L2A-C"],[36,11,11,"L2A-R"]]],[60,"D",[[7,36,10,"L2A-L"],[19,26,15,"L2A-C"],[36,11,11,"L2A-R"]]],[61,"E",[[7,36,10,"L2A-L"],[19,26,15,"L2A-C"],[36,11,11,"L2A-R"]]],[64,"F",[[7,32,16,"L2B-L"],[31,16,16,"L2B-R"]]],[65,"G",[[7,32,16,"L2B-L"],[31,16,16,"L2B-R"]]],[66,"H",[[7,32,16,"L2B-L"],[31,16,16,"L2B-R"]]],[67,"J",[[7,32,16,"L2B-L"],[31,16,16,"L2B-R"]]],[68,"K",[[7,32,16,"L2B-L"],[31,16,16,"L2B-R"]]]],"labels":[[57,6,"A",1,1,1],[57,18,"A",1,1,1],[57,35,"A",1,1,1],[58,6,"B",1,1,1],[58,18,"B",1,1,1],[58,35,"B",1,1,1],[59,6,"C",1,1,1],[59,18,"C",1,1,1],[59,35,"C",1,1,1],[60,6,"D",1,1,1],[60,18,"D",1,1,1],[60,35,"D",1,1,1],[61,6,"E",1,1,1],[61,18,"E",1,1,1],[61,35,"E",1,1,1],[64,6,"F",1,1,1],[64,47,"F",1,1,1],[65,6,"G",1,1,1],[65,47,"G",1,1,1],[66,6,"H",1,1,1],[66,47,"H",1,1,1],[67,6,"J",1,1,1],[67,47,"J",1,1,1],[68,6,"K",1,1,1],[68,47,"K",1,1,1],[70,28,"Main Entrance",1,1,0]]}};
 function heatFg(n, cap){
   if(n == null || n === 0) return "var(--ink-3)";
   return Math.ceil(n / cap * 5) >= 3 ? "#fff" : "var(--ink)";
@@ -798,13 +749,25 @@ function drawPlan(P, title, sub){
       const v = secVal(key);
       const bg = heatVar(v, sec.cap), fg = heatFg(v, sec.cap);
       for(let i = 0; i < len; i++){
-        const gc = c0 + i - P.c0 + 1;
         h += `<button class="tpseat" data-goto="${key}"
-          style="--bg:${bg};--fg:${fg};grid-column:${gc};grid-row:${gr}"
-          title="${letter}${n0 - i} · ${S.lang === "en" ? sec.en : sec.zh} · ${v == null ? (S.lang === "en" ? "not counted" : "未点算") : v + "/" + sec.cap}"
+          style="--bg:${bg};--fg:${fg};grid-column:${c0 + i - P.c0 + 1};grid-row:${gr}"
+          title="${letter}${n0 - i} · ${S.lang === "en" ? "section" : "第"} ${sec.n}${S.lang === "en" ? "" : " 区"} · ${S.lang === "en" ? sec.en : sec.zh}"
           >${n0 - i}</button>`;
       }
     });
+  });
+  // The plan's own numbering, printed where his sketch prints it.
+  Object.keys(P.boxes).forEach(key => {
+    const sec = SMAP[key];
+    if(!sec) return;
+    const bx = P.boxes[key];
+    const gr = bx[0] - P.r0 + 1, gc = bx[2] - P.c0 + 1;
+    const rs = bx[1] - bx[0] + 1, cs = bx[3] - bx[2] + 1;
+    const fs = Math.max(13, Math.min(42, Math.min(cs * COLW, rs * ROWH) * 0.62));
+    const v = secVal(key);
+    const col = heatFg(v, sec.cap) === "#fff" ? "rgba(255,255,255,.9)" : "rgba(21,14,16,.45)";
+    h += `<div class="tpnum" style="grid-column:${gc}/span ${cs};grid-row:${gr}/span ${rs};
+      font-size:${fs.toFixed(0)}px;color:${col}">${sec.n}</div>`;
   });
   h += `</div><div class="legend"><span>${S.lang === "en" ? "how full" : "入座密度"}</span>
     <span class="ramp">${[0,1,2,3,4,5].map(i => `<i style="background:var(--heat-${i})"></i>`).join("")}</span>
@@ -816,8 +779,8 @@ function viewMap(){
     + drawPlan(PLAN.l1, "Main Auditorium", "Level 1 · " + levelSum("L1") + "/836")
     + `<h2 class="sec">${bi("二楼 副堂 · 340 座","Level 2 · Upper · 340 seats")}<span class="chip">${levelSum("L2")}</span></h2>`
     + drawPlan(PLAN.l2, "Upper Auditorium", "Level 2 · " + levelSum("L2") + "/340")
-    + `<p class="hint" style="margin:12px 0 0">${bi("这就是礼堂平面图本身 —— 每一格是一个座位，位置、走道、空缺都和图上一样。颜色是整区的密度。点任何一个座位就跳去填那一区的数字。",
-        "This is the floor plan itself — one cell per seat, with the same positions, aisles and gaps as the printed plan. The colour shows how full that section is. Tap any seat to jump to its section's number.")}</p>`;
+    + `<p class="hint" style="margin:12px 0 0">${bi("这就是礼堂平面图本身，每一格是一个座位。方框上的号码就是区号 —— 一楼 1 到 17 区，二楼 18 到 22 区。颜色是整区的密度。点任何一个座位就跳去填那一区的数字。",
+        "This is the floor plan itself, one cell per seat. The number printed on each block is its section number — 1 to 17 downstairs, 18 to 22 upstairs. The colour shows how full it is. Tap any seat to jump to that section's number.")}</p>`;
 }
 
 /* ============================================================
@@ -1013,8 +976,8 @@ function viewHelp(){
     <p>${bi("讲道开始后 5 分钟。那时迟到的人已入座，出去的人还没走。填在「点算时间」栏，每周一致，数字才可比较。",
       "Five minutes into the sermon. Latecomers are seated by then and nobody has left yet. Record it in the “Count at” field — consistency is what makes weeks comparable.")}</p>
     <h3><span class="zh">二、一位招待，分三遍</span><span class="en">2. One usher, three passes</span></h3>
-    <p>${bi("礼堂横向分成三带：A–F（讲台前）、G–T（中间大区）、V–Z（看台下方）。每一带在四个座位区里都是同一个范围 —— 左区、中左、中右、右侧，所以「A–F」不管看哪里都是同一排范围。先在二楼栏杆旁数 A–F 和 G–T 两带；再走下去数 V–Z 那一带；最后回到二楼数 A–E 和 F–K。一共十六个数字。",
-      "The auditorium splits into three horizontal bands: A–F (in front of the cross aisle), G–T (the middle mass) and V–Z (under the balcony). Each band covers the same rows in all four blocks — left, centre-left, centre-right, right side — so “A–F” means the same place wherever you look. From the balcony rail count bands A–F and G–T; walk down for band V–Z; then count A–E and F–K upstairs. Sixteen numbers in all.")}</p>
+    <p>${bi("礼堂按平面图上的方框分区，编号 1 到 17（一楼）和 18 到 22（二楼）—— 和图上画的方框一模一样。先在二楼栏杆旁数 1 到 8 区；再走下去数 9 到 17 区（看台下方看不见的那些）；最后回到二楼数 18 到 22 区。一共二十二个数字。",
+      "The auditorium is divided into the blocks the floor plan itself draws, numbered 1 to 17 downstairs and 18 to 22 upstairs — the same boxes you see on the plan. From the balcony rail count sections 1 to 8; walk down for 9 to 17, the ones the balcony hides; then count 18 to 22 upstairs. Twenty-two numbers in all.")}</p>
     <h3><span class="zh">三、每月找第二个人核对一次</span><span class="en">3. Have a second person check once a month</span></h3>
     <p>${bi("一个人点算，就没有第二个数字可以对照。每月请另一位招待在同一时刻独立数一遍，两人相差超过 3% 就一起检讨做法 —— 通常是前几排从二楼数错了。",
       "With one counter there is no second number to check against. Once a month, ask another usher to count independently at the same moment. If the two differ by more than 3%, review the method together — it is usually the front rows, misread from the balcony.")}</p>
@@ -1025,14 +988,14 @@ function viewHelp(){
     <p>${bi("每次按「存入记录」，「记录」页就能看趋势。数据只存在这台手机里 —— 请每周导出 CSV 贴进 Google Sheet，那才是真正的存档。",
       "Press “Save to history” each week and the History tab shows the trend. The data lives only on this phone, so export the CSV into your Google Sheet each week — that is the real archive.")}</p>
   </div>
-  <h2 class="sec">${bi("十六个区","The sixteen sections")}</h2>
+  <h2 class="sec">${bi("二十二个区","The twenty-two sections")}</h2>
   <div class="panel"><div class="pb" style="overflow-x:auto"><table class="tbl">
     <thead><tr><th>${S.lang === "en" ? "Pass" : "遍"}</th><th>${S.lang === "en" ? "Section" : "区域"}</th>
       <th class="n">${S.lang === "en" ? "Seats" : "座位"}</th></tr></thead><tbody>` +
     [1,2,3].map(pn => {
       const ss = SECTIONS.filter(s => passOf(s) === pn);
       return ss.map((s,i) => `<tr><td>${i === 0 ? pn : ""}</td>
-        <td>${S.lang === "en" ? s.en : s.zh} <span style="color:var(--ink-3);font-family:var(--mono);font-size:11px">${s.key}</span></td>
+        <td><b>${s.n}</b> · ${S.lang === "en" ? s.en : s.zh}</td>
         <td class="n">${s.cap}</td></tr>`).join("") +
         `<tr><td></td><td style="font-weight:600">${S.lang === "en" ? "Pass " + pn + " total" : "第 " + pn + " 遍合计"}</td>
          <td class="n" style="font-weight:600">${ss.reduce((t,s) => t + s.cap, 0)}</td></tr>`;
