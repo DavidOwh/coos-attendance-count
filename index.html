@@ -156,6 +156,11 @@ h2.sec:first-of-type{margin-top:18px}
 
 /* ---------- section card: one number per section ---------- */
 .secgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:10px}
+.bandhd{display:flex;align-items:baseline;gap:10px;margin:16px 0 8px;padding:0 2px}
+.bandhd .t{font-weight:700;font-size:15.5px;color:var(--on-ground);letter-spacing:-.01em}
+.bandhd .t .en{display:block;font-size:.76em;font-weight:400;color:var(--on-ground-2);letter-spacing:.01em}
+.bandhd .n{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--on-ground-2);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
 .sc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 12px 12px;
   display:flex;flex-direction:column;gap:9px}
 .sc.filled{border-color:var(--line-strong)}
@@ -387,34 +392,38 @@ function blockRowCap(block, label){
   return r ? r[1] : 0;
 }
 
-/* One number per section — twelve of them. Sections follow the seating
-   blocks an usher can actually walk and see, split so no clicker run is
-   longer than about 170 seats. */
+/* One number per section. A section is one row-band within one seating
+   block, and the bands line up across every block so "A-F" means the same
+   place wherever the usher looks. Band edges are the real cross-aisles in
+   the plan. */
+const BANDS = {
+  1:{zh:"A–F 排 · 讲台前第一区", en:"Rows A–F · front, before the cross aisle"},
+  2:{zh:"G–T 排 · 中间大区",     en:"Rows G–T · the middle mass"},
+  3:{zh:"V–Z 排 · 二楼看台下方", en:"Rows V–Z · under the balcony"},
+  4:{zh:"二楼 A–E 排",          en:"Upper level · rows A–E"},
+  5:{zh:"二楼 F–K 排",          en:"Upper level · rows F–K"}
+};
 const SECTIONS = [
-  {key:"L1-L",   pass:1, lv:"L1", zh:"左区 A–T",      en:"Left block, rows A–T",
-   parts:[["left","A B C D E F G H N P Q R S T"]]},
-  {key:"L1-CLF", pass:1, lv:"L1", zh:"中左 前段 A–M", en:"Centre-left, rows A–M",
-   parts:[["cleft","A B C D E F G H J K L M"]]},
-  {key:"L1-CLR", pass:1, lv:"L1", zh:"中左 后段 N–T", en:"Centre-left, rows N–T",
-   parts:[["cleft","N P Q R S T"]]},
-  {key:"L1-CRF", pass:1, lv:"L1", zh:"中右 前段 A–M", en:"Centre-right, rows A–M",
-   parts:[["cright","A B C D E F G H J K L M"]]},
-  {key:"L1-CRR", pass:1, lv:"L1", zh:"中右 后段 N–T", en:"Centre-right, rows N–T",
-   parts:[["cright","N P Q R S T"]]},
-  {key:"L1-CLB", pass:2, lv:"L1", zh:"中左 末段 V–Y", en:"Centre-left back, rows V–Y",
-   parts:[["cleft","V W X Y"]]},
-  {key:"L1-CRB", pass:2, lv:"L1", zh:"中右 末段 V–Y", en:"Centre-right back, rows V–Y",
-   parts:[["cright","V W X Y"]]},
-  {key:"L1-RS",  pass:2, lv:"L1", zh:"右侧区 座号 1–6", en:"Right side, seats 1–6",
-   parts:[["right","B C M N P Q R S T U V W X Y Z"]]},
-  {key:"L1-Z",   pass:2, lv:"L1", zh:"最后一排 Z",    en:"Back row Z",
-   parts:[["zrow","Z-L Z-R"]]},
-  {key:"L2-L",   pass:3, lv:"L2", zh:"二楼 左区",     en:"Upper left",
-   parts:[["l2left","A B C D E F G H J K"]]},
-  {key:"L2-C",   pass:3, lv:"L2", zh:"二楼 中区",     en:"Upper centre",
-   parts:[["l2mid","A B C D E"]]},
-  {key:"L2-R",   pass:3, lv:"L2", zh:"二楼 右区",     en:"Upper right",
-   parts:[["l2right","A B C D E F G H J K"]]}
+  // Band 1 — rows A–F
+  {key:"B1-L",  band:1, lv:"L1", zh:"A–F 左区",   en:"A–F · Left",         parts:[["left","A B C D E F"]]},
+  {key:"B1-CL", band:1, lv:"L1", zh:"A–F 中左区", en:"A–F · Centre-left",  parts:[["cleft","A B C D E F"]]},
+  {key:"B1-CR", band:1, lv:"L1", zh:"A–F 中右区", en:"A–F · Centre-right", parts:[["cright","A B C D E F"]]},
+  {key:"B1-R",  band:1, lv:"L1", zh:"B–C 右侧区", en:"B–C · Right side",   parts:[["right","B C"]]},
+  // Band 2 — rows G–T (the left block has no J–M; that is the sound console)
+  {key:"B2-L",  band:2, lv:"L1", zh:"G–T 左区",   en:"G–T · Left",         parts:[["left","G H N P Q R S T"]]},
+  {key:"B2-CL", band:2, lv:"L1", zh:"G–T 中左区", en:"G–T · Centre-left",  parts:[["cleft","G H J K L M N P Q R S T"]]},
+  {key:"B2-CR", band:2, lv:"L1", zh:"G–T 中右区", en:"G–T · Centre-right", parts:[["cright","G H J K L M N P Q R S T"]]},
+  {key:"B2-R",  band:2, lv:"L1", zh:"M–T 右侧区", en:"M–T · Right side",   parts:[["right","M N P Q R S T"]]},
+  // Band 3 — rows V–Z, tucked under the balcony (row Z spans the centre)
+  {key:"B3-CL", band:3, lv:"L1", zh:"V–Z 中左区", en:"V–Z · Centre-left",  parts:[["cleft","V W X Y"],["zrow","Z-L"]]},
+  {key:"B3-CR", band:3, lv:"L1", zh:"V–Z 中右区", en:"V–Z · Centre-right", parts:[["cright","V W X Y"],["zrow","Z-R"]]},
+  {key:"B3-R",  band:3, lv:"L1", zh:"U–Z 右侧区", en:"U–Z · Right side",   parts:[["right","U V W X Y Z"]]},
+  // Level 2 — band A–E across all three blocks, then F–K either side of the stairs
+  {key:"L2A-L", band:4, lv:"L2", zh:"二楼 A–E 左区", en:"Upper A–E · Left",   parts:[["l2left","A B C D E"]]},
+  {key:"L2A-C", band:4, lv:"L2", zh:"二楼 A–E 中区", en:"Upper A–E · Centre", parts:[["l2mid","A B C D E"]]},
+  {key:"L2A-R", band:4, lv:"L2", zh:"二楼 A–E 右区", en:"Upper A–E · Right",  parts:[["l2right","A B C D E"]]},
+  {key:"L2B-L", band:5, lv:"L2", zh:"二楼 F–K 左区", en:"Upper F–K · Left",   parts:[["l2left","F G H J K"]]},
+  {key:"L2B-R", band:5, lv:"L2", zh:"二楼 F–K 右区", en:"Upper F–K · Right",  parts:[["l2right","F G H J K"]]}
 ];
 const SMAP = {};
 SECTIONS.forEach(sec => {
@@ -433,13 +442,13 @@ const PASSES = [
   {n:1,
    zh:"第一遍 · 在二楼看台点算一楼",
    en:"Pass 1 · Count Level 1 from the balcony",
-   tzh:"站在二楼栏杆旁，用计数器数完一区，把数字填进那一区的格子。靠讲台的前几排从上面最难数 —— 那几区按「数空位」，数空椅子比数人头准得多。",
-   ten:"Stand at the balcony rail, click through one section, then type that number into its box. The front rows nearest the stage are hardest from above — tap “Empties” for those and click empty chairs instead of heads."},
+   tzh:"站在二楼栏杆旁，一带一带往下数。用计数器数完一区，把数字填进那一区的格子。A–F 那一带靠讲台，从上面最难数 —— 按「数空位」，数空椅子比数人头准得多。",
+   ten:"Stand at the balcony rail and work down one band at a time. Click through a section, type the number into its box. Band A–F sits nearest the stage and is the hardest to read from above — tap “Empties” there and click empty chairs instead of heads."},
   {n:2,
    zh:"第二遍 · 走到一楼后方点算",
    en:"Pass 2 · Walk to the rear of Level 1",
-   tzh:"二楼看台正下方的座位从上面看不见。讲道中走下去，靠近那几区数。若发现还有别的区从上面看不清，按该区的「看不见」把它移到这一遍 —— 设定会记住。",
-   ten:"The seats tucked under the balcony can't be seen from above. Walk down during the sermon and count those sections up close. If another section turns out to be hard to see, tap “Hidden” on it to move it into this pass — the setting is remembered."},
+   tzh:"V–Z 那一带在二楼看台正下方，从上面看不见。讲道中走下去，靠近那三区数。若发现还有别的区从上面看不清，按该区的「看不见」把它移到这一遍 —— 设定会记住。",
+   ten:"Band V–Z sits directly under the balcony and cannot be seen from above. Walk down during the sermon and count those three sections up close. If another section turns out to be hard to see, tap “Hidden” on it to move it into this pass — the setting is remembered."},
   {n:3,
    zh:"第三遍 · 二楼（你站的这一层）",
    en:"Pass 3 · Level 2, where you're standing",
@@ -457,10 +466,10 @@ const EXTRAS = [
 ];
 
 /* ============================================================ */
-const STORE = "coos-count-v3";
-const OLD_STORE = "coos-count-v2";
+const STORE = "coos-count-v4";
+const OLD_STORE = "coos-count-v3";
 const SERVICES_DEFAULT = ["主日华语崇拜 2:00pm · Sunday Chinese Service"];
-const HIDDEN_DEFAULT = ["L1-CLB","L1-CRB","L1-RS","L1-Z"];
+const HIDDEN_DEFAULT = ["B3-CL","B3-CR","B3-R"];
 const todayISO = () => new Date().toLocaleDateString("en-CA");
 
 function blankCounts(){ const c = {}; SECTIONS.forEach(s => c[s.key] = null); return c; }
@@ -474,9 +483,11 @@ function freshDraft(keepSvc, keepBy){
    visible at a glance. Banner-marked, and one tap clears it. */
 function demoDraft(){
   const c = blankCounts();
-  c["L1-L"] = 92; c["L1-CLF"] = 141; c["L1-CLR"] = 58; c["L1-CRF"] = 136; c["L1-CRR"] = 61;
-  c["L1-CLB"] = 19; c["L1-CRB"] = 16; c["L1-RS"] = 44; c["L1-Z"] = 9;
-  c["L2-L"] = 47; c["L2-C"] = 38; c["L2-R"] = 43;
+  c["B1-L"]  = 38; c["B1-CL"] = 71;  c["B1-CR"] = 68;  c["B1-R"] = 7;
+  c["B2-L"]  = 52; c["B2-CL"] = 132; c["B2-CR"] = 126; c["B2-R"] = 24;
+  c["B3-CL"] = 21; c["B3-CR"] = 18;  c["B3-R"]  = 11;
+  c["L2A-L"] = 31; c["L2A-C"] = 44;  c["L2A-R"] = 33;
+  c["L2B-L"] = 26; c["L2B-R"] = 22;
   const e = blankExtras();
   e.child = 62; e.nursery = 11; e.serving = 24; e.standing = 0; e.online = 138;
   return {date:todayISO(), svc:SERVICES_DEFAULT[0], time:"14:45", by:"",
@@ -706,10 +717,24 @@ function viewCount(){
         <span class="chip ${ss.length && done === ss.length ? "done" : "todo"}">${done}/${ss.length} ${S.lang === "en" ? "sections filled" : "区已填"}</span>
         <span class="chip">${cap ? Math.round(sum / cap * 100) : 0}%</span>
       </div>`;
-    h += ss.length
-      ? `<div class="secgrid">` + ss.map(secCard).join("") + `</div>`
-      : `<div class="emptypass">${bi("这一遍目前没有区域。按其他区的「看不见」可以把它移到这里。",
-          "Nothing in this pass right now. Tap “Hidden” on a section to move it here.")}</div>`;
+    if(!ss.length){
+      h += `<div class="emptypass">${bi("这一遍目前没有区域。按其他区的「看不见」可以把它移到这里。",
+        "Nothing in this pass right now. Tap “Hidden” on a section to move it here.")}</div>`;
+    } else {
+      // Sections are grouped by band, so the usher counts one horizontal
+      // strip of the room at a time instead of hopping around.
+      const bandIds = [];
+      ss.forEach(sec => { if(bandIds.indexOf(sec.band) < 0) bandIds.push(sec.band); });
+      bandIds.forEach(bid => {
+        const bs = ss.filter(sec => sec.band === bid);
+        const bcap = bs.reduce((t,x) => t + x.cap, 0);
+        const bsum = bs.reduce((t,x) => t + (secVal(x.key) || 0), 0);
+        h += `<div class="bandhd">
+          <span class="t"><span class="zh">${BANDS[bid].zh}</span><span class="en">${BANDS[bid].en}</span></span>
+          <span class="n">${bsum} / ${bcap}</span></div>`;
+        h += `<div class="secgrid">` + bs.map(secCard).join("") + `</div>`;
+      });
+    }
     h += `</div>`;
   });
 
@@ -808,7 +833,7 @@ function sectionBox(sec, colMax, align){
     <span class="sbox-rows${align === "end" ? " alignend" : ""}">${bars}</span>
   </button>`;
 }
-function planFor(cols, title, sub, stageTop, zSection){
+function planFor(cols, title, sub, stageTop){
   let h = `<div class="planwrap"><div class="plan-t"><h3>${title}</h3><span>${sub}</span></div>`;
   if(stageTop) h += `<div class="stage">${S.lang === "en" ? "Stage" : "讲台 STAGE"}</div>`;
   h += `<div class="cols">`;
@@ -817,7 +842,6 @@ function planFor(cols, title, sub, stageTop, zSection){
       sectionsOfBlock(c.block).map(sec => sectionBox(sec, c.max, c.align)).join("") + `</div>`;
   });
   h += `</div>`;
-  if(zSection) h += `<div class="zfull">${sectionBox(SMAP[zSection], 13)}</div>`;
   if(!stageTop) h += `<div class="entrance">${S.lang === "en" ? "Main entrance ↑" : "↑ 主入口 MAIN ENTRANCE"}</div>`;
   h += `<div class="legend"><span>${S.lang === "en" ? "how full" : "入座密度"}</span>
     <span class="ramp">${[0,1,2,3,4,5].map(i => `<i style="background:var(--heat-${i})"></i>`).join("")}</span>
@@ -826,9 +850,9 @@ function planFor(cols, title, sub, stageTop, zSection){
 }
 function viewMap(){
   return `<h2 class="sec">${bi("一楼 主堂 · 836 座","Level 1 · Main · 836 seats")}<span class="chip">${levelSum("L1")}</span></h2>`
-    + planFor(L1_COLS, "Main Auditorium", "Level 1 · " + levelSum("L1") + "/836", true, "L1-Z")
+    + planFor(L1_COLS, "Main Auditorium", "Level 1 · " + levelSum("L1") + "/836", true)
     + `<h2 class="sec">${bi("二楼 副堂 · 340 座","Level 2 · Upper · 340 seats")}<span class="chip">${levelSum("L2")}</span></h2>`
-    + planFor(L2_COLS, "Upper Auditorium", "Level 2 · " + levelSum("L2") + "/340", false, null)
+    + planFor(L2_COLS, "Upper Auditorium", "Level 2 · " + levelSum("L2") + "/340", false)
     + `<p class="hint" style="margin:12px 0 0">${bi("每个方框就是一区，方框里的横条是那一区的每一排（字母是排号）。颜色是整区的密度。点一下方框就跳去填那一区的数字。",
         "Each box is one section; the strips inside are its rows, lettered as they are in the auditorium. The colour shows how full that section is. Tap a box to jump to its number.")}</p>`;
 }
@@ -1026,11 +1050,11 @@ function viewHelp(){
     <p>${bi("讲道开始后 5 分钟。那时迟到的人已入座，出去的人还没走。填在「点算时间」栏，每周一致，数字才可比较。",
       "Five minutes into the sermon. Latecomers are seated by then and nobody has left yet. Record it in the “Count at” field — consistency is what makes weeks comparable.")}</p>
     <h3><span class="zh">二、一位招待，分三遍</span><span class="en">2. One usher, three passes</span></h3>
-    <p>${bi("先站在二楼栏杆旁点算一楼看得见的五区；再走下去点算看台正下方那四区；最后回到二楼点算这一层的三区。一共十二个数字。",
-      "First, from the balcony rail, count the five Level 1 sections you can see. Then walk down for the four sections tucked under the balcony. Finally count the three sections on Level 2 itself. Twelve numbers in all.")}</p>
+    <p>${bi("礼堂横向分成三带：A–F（讲台前）、G–T（中间大区）、V–Z（看台下方）。每一带在四个座位区里都是同一个范围 —— 左区、中左、中右、右侧，所以「A–F」不管看哪里都是同一排范围。先在二楼栏杆旁数 A–F 和 G–T 两带；再走下去数 V–Z 那一带；最后回到二楼数 A–E 和 F–K。一共十六个数字。",
+      "The auditorium splits into three horizontal bands: A–F (in front of the cross aisle), G–T (the middle mass) and V–Z (under the balcony). Each band covers the same rows in all four blocks — left, centre-left, centre-right, right side — so “A–F” means the same place wherever you look. From the balcony rail count bands A–F and G–T; walk down for band V–Z; then count A–E and F–K upstairs. Sixteen numbers in all.")}</p>
     <h3><span class="zh">三、快满的区改数空椅子</span><span class="en">3. On a full section, count the empty chairs</span></h3>
-    <p>${bi("一区 168 个座位坐了 160 人 —— 数 8 张空椅子比数 160 个人快得多，也不易错。按该区的「数空位」，填空椅子数量，App 自动换算成人数。",
-      "A section of 168 seats with 160 people — counting 8 empty chairs is far faster and safer than counting 160 heads. Tap “Empties” on that section, enter the empty chairs, and the app converts it.")}</p>
+    <p>${bi("「G–T 中左区」有 168 个座位，坐了 160 人 —— 数 8 张空椅子比数 160 个人快得多，也不易错。按该区的「数空位」，填空椅子数量，App 自动换算成人数。",
+      "“G–T Centre-left” holds 168 seats. With 160 people in it, counting 8 empty chairs is far faster and safer than counting 160 heads. Tap “Empties” on that section, enter the empty chairs, and the app converts it.")}</p>
     <h3><span class="zh">四、每月找第二个人核对一次</span><span class="en">4. Have a second person check once a month</span></h3>
     <p>${bi("一个人点算，就没有第二个数字可以对照。每月请另一位招待在同一时刻独立数一遍，两人相差超过 3% 就一起检讨做法 —— 通常是前几排从二楼数错了。",
       "With one counter there is no second number to check against. Once a month, ask another usher to count independently at the same moment. If the two differ by more than 3%, review the method together — it is usually the front rows, misread from the balcony.")}</p>
@@ -1041,7 +1065,7 @@ function viewHelp(){
     <p>${bi("每次按「存入记录」，「记录」页就能看趋势。数据只存在这台手机里 —— 请每周导出 CSV 贴进 Google Sheet，那才是真正的存档。",
       "Press “Save to history” each week and the History tab shows the trend. The data lives only on this phone, so export the CSV into your Google Sheet each week — that is the real archive.")}</p>
   </div>
-  <h2 class="sec">${bi("十二个区","The twelve sections")}</h2>
+  <h2 class="sec">${bi("十六个区","The sixteen sections")}</h2>
   <div class="panel"><div class="pb" style="overflow-x:auto"><table class="tbl">
     <thead><tr><th>${S.lang === "en" ? "Pass" : "遍"}</th><th>${S.lang === "en" ? "Section" : "区域"}</th>
       <th class="n">${S.lang === "en" ? "Seats" : "座位"}</th></tr></thead><tbody>` +
