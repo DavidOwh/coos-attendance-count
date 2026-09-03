@@ -51,7 +51,6 @@ img{max-width:100%}
   --accent-ink:#FFFFFF; --accent-soft:#F6E2E6;
   --ok:#1F5C41; --ok-soft:#DEEDE5;
   --warn:#7A4A08; --warn-soft:#F8E7CC;
-  --heat-0:#EFE3E5; --heat-1:#E4B9C1; --heat-2:#D28595; --heat-3:#B94F65; --heat-4:#93122E; --heat-5:#6B0C21;
   --tick:rgba(21,14,16,.22);
   --shadow:0 1px 2px rgba(0,0,0,.3), 0 14px 34px -16px rgba(0,0,0,.6);
   --sans:"IBM Plex Sans","Noto Sans SC",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -156,18 +155,31 @@ h2.sec:first-of-type{margin-top:18px}
 
 /* ---------- section card: one number per section ---------- */
 .secgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:10px}
-.sc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 12px 12px;
-  display:flex;flex-direction:column;gap:9px}
+.jumpwrap{margin:14px 0 4px}
+.jumplabel{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--on-ground-2);margin-bottom:6px}
+.jump{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none}
+.jump::-webkit-scrollbar{display:none}
+.jchip{flex:0 0 auto;width:36px;height:36px;border-radius:10px;border:2px solid var(--c);
+  background:transparent;color:var(--on-ground);font-family:var(--display);font-weight:700;
+  font-size:16px;cursor:pointer;font-variant-numeric:tabular-nums}
+.jchip.on{background:var(--c);color:#fff}
+.sc{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--gc);
+  border-radius:12px;padding:11px 12px 12px;display:flex;flex-direction:column;gap:9px;
+  scroll-margin-top:150px}
+.sc.hit{box-shadow:0 0 0 3px var(--gc)}
 .sc.filled{border-color:var(--line-strong)}
 .sc.over{border-color:color-mix(in srgb,var(--warn) 55%,transparent)}
 .sc-hd{display:flex;align-items:flex-start;gap:9px}
-.scnum{flex:0 0 auto;width:30px;height:30px;border-radius:8px;background:var(--accent);
-  color:var(--accent-ink);display:grid;place-items:center;font-family:var(--display);
-  font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
+.scnum{flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:var(--gc);
+  color:#fff;display:grid;place-items:center;font-family:var(--display);
+  font-weight:700;font-size:18px;font-variant-numeric:tabular-nums}
+.scloc{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+svg.loc{width:66px;height:auto;display:block;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:3px;padding:2px}
+.grpname{font-size:11px;color:var(--gc);font-weight:600;white-space:nowrap}
 .sc-hd .nm{font-weight:700;font-size:17px;letter-spacing:-.01em}
 .sc-hd .sub{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--ink-2);text-transform:uppercase}
-.sc-pc{margin-left:auto;flex:0 0 auto;text-align:right;font-family:var(--mono);font-size:13px;color:var(--ink-2);
-  font-variant-numeric:tabular-nums}
 .entry{display:flex;align-items:stretch;gap:7px}
 .entry .stepbtn{flex:0 0 auto;width:42px;border:1px solid var(--line);background:var(--surface-2);
   border-radius:9px;font-size:24px;cursor:pointer;color:var(--ink);line-height:1;font-weight:500}
@@ -180,6 +192,7 @@ h2.sec:first-of-type{margin-top:18px}
 .entry input:focus{border-color:var(--accent);background:var(--surface)}
 .bar{height:5px;border-radius:3px;background:var(--sunken);overflow:hidden}
 .bar i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.pcline{font-family:var(--mono);font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .sc-ft{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .mini{border:1px solid var(--line-strong);background:transparent;border-radius:7px;padding:6px 10px;font-size:13px;
   cursor:pointer;color:var(--ink-2)}
@@ -231,8 +244,11 @@ details.fold>.fb{padding:12px 13px 13px;border-top:1px solid var(--line)}
 .tplab.entrance{border:0;background:transparent;font-weight:600;color:var(--ink);text-align:left}
 .legend{display:flex;align-items:center;gap:8px;margin-top:11px;font-family:var(--mono);font-size:11px;
   letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2);flex-wrap:wrap}
-.ramp{display:flex;gap:2px}
-.ramp i{width:20px;height:10px;border-radius:2px;display:block;box-shadow:inset 0 0 0 1px var(--tick)}
+.legend .lg{display:flex;align-items:center;gap:5px;text-transform:none;letter-spacing:0;
+  font-family:var(--sans);font-size:12px;color:var(--ink)}
+.legend .lg i{width:12px;height:12px;border-radius:3px;display:block;flex:0 0 auto}
+.legend .lgnote{margin-left:auto;text-transform:none;letter-spacing:0;font-family:var(--sans);
+  font-size:12px;color:var(--ink-2)}
 /* ---------- tables ---------- */
 .tbl{width:100%;border-collapse:collapse;font-size:15px}
 .tbl th,.tbl td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line)}
@@ -371,29 +387,54 @@ const SECCAP = {"S1":53,"S2":84,"S3":84,"S4":12,"S5":18,"S7":168,"S8":168,"S15":
    marked them: 1-17 on the main floor, 18-22 upstairs. Capacities come from
    SECCAP above, generated from the workbook, so nothing here is hand-typed. */
 const SECTIONS = [
-  {key:"S1",  n:1,  pass:1, lv:"L1", zh:"左区 A–F",        en:"Left · rows A–F"},
-  {key:"S2",  n:2,  pass:1, lv:"L1", zh:"中左区 A–F",      en:"Centre-left · rows A–F"},
-  {key:"S3",  n:3,  pass:1, lv:"L1", zh:"中右区 A–F",      en:"Centre-right · rows A–F"},
-  {key:"S4",  n:4,  pass:1, lv:"L1", zh:"右侧区 B–C",      en:"Right side · rows B–C"},
-  {key:"S5",  n:5,  pass:1, lv:"L1", zh:"左区 G–H",        en:"Left · rows G–H"},
-  {key:"S6",  n:6,  pass:1, lv:"L1", zh:"左区 N–T",        en:"Left · rows N–T"},
-  {key:"S7",  n:7,  pass:1, lv:"L1", zh:"中左区 G–T",      en:"Centre-left · rows G–T"},
-  {key:"S8",  n:8,  pass:1, lv:"L1", zh:"中右区 G–T",      en:"Centre-right · rows G–T"},
-  {key:"S9",  n:9,  pass:2, lv:"L1", zh:"中左 V–Y 座号 28–26", en:"Centre-left pod · seats 28–26"},
-  {key:"S10", n:10, pass:2, lv:"L1", zh:"中左 V–Y 座号 25–22", en:"Centre-left pod · seats 25–22"},
-  {key:"S11", n:11, pass:2, lv:"L1", zh:"中左 V–Y 座号 21–18", en:"Centre-left pod · seats 21–18"},
-  {key:"S12", n:12, pass:2, lv:"L1", zh:"中右 V–Y 座号 17–14", en:"Centre-right pod · seats 17–14"},
-  {key:"S13", n:13, pass:2, lv:"L1", zh:"中右 V–Y 座号 13–10", en:"Centre-right pod · seats 13–10"},
-  {key:"S14", n:14, pass:2, lv:"L1", zh:"中右 V–Y 座号 9–7",   en:"Centre-right pod · seats 9–7"},
-  {key:"S15", n:15, pass:2, lv:"L1", zh:"右侧区 M–Z",      en:"Right side · rows M–Z"},
-  {key:"S16", n:16, pass:2, lv:"L1", zh:"最后一排 Z 左半",  en:"Back row Z · left half"},
-  {key:"S17", n:17, pass:2, lv:"L1", zh:"最后一排 Z 右半",  en:"Back row Z · right half"},
-  {key:"S18", n:18, pass:3, lv:"L2", zh:"二楼 左区 A–E",    en:"Upper left · rows A–E"},
-  {key:"S19", n:19, pass:3, lv:"L2", zh:"二楼 中区 A–E",    en:"Upper centre · rows A–E"},
-  {key:"S20", n:20, pass:3, lv:"L2", zh:"二楼 右区 A–E",    en:"Upper right · rows A–E"},
-  {key:"S21", n:21, pass:3, lv:"L2", zh:"二楼 左区 F–K",    en:"Upper left · rows F–K"},
-  {key:"S22", n:22, pass:3, lv:"L2", zh:"二楼 右区 F–K",    en:"Upper right · rows F–K"}
+  {key:"S1",  n:1,  pass:1, grp:"left", lv:"L1", zh:"左区 A–F",        en:"Left · rows A–F"},
+  {key:"S2",  n:2,  pass:1, grp:"cl", lv:"L1", zh:"中左区 A–F",      en:"Centre-left · rows A–F"},
+  {key:"S3",  n:3,  pass:1, grp:"cr", lv:"L1", zh:"中右区 A–F",      en:"Centre-right · rows A–F"},
+  {key:"S4",  n:4,  pass:1, grp:"right", lv:"L1", zh:"右侧区 B–C",      en:"Right side · rows B–C"},
+  {key:"S5",  n:5,  pass:1, grp:"left", lv:"L1", zh:"左区 G–H",        en:"Left · rows G–H"},
+  {key:"S6",  n:6,  pass:1, grp:"left", lv:"L1", zh:"左区 N–T",        en:"Left · rows N–T"},
+  {key:"S7",  n:7,  pass:1, grp:"cl", lv:"L1", zh:"中左区 G–T",      en:"Centre-left · rows G–T"},
+  {key:"S8",  n:8,  pass:1, grp:"cr", lv:"L1", zh:"中右区 G–T",      en:"Centre-right · rows G–T"},
+  {key:"S9",  n:9,  pass:2, grp:"cl", lv:"L1", zh:"中左 V–Y 座号 28–26", en:"Centre-left pod · seats 28–26"},
+  {key:"S10", n:10, pass:2, grp:"cl", lv:"L1", zh:"中左 V–Y 座号 25–22", en:"Centre-left pod · seats 25–22"},
+  {key:"S11", n:11, pass:2, grp:"cl", lv:"L1", zh:"中左 V–Y 座号 21–18", en:"Centre-left pod · seats 21–18"},
+  {key:"S12", n:12, pass:2, grp:"cr", lv:"L1", zh:"中右 V–Y 座号 17–14", en:"Centre-right pod · seats 17–14"},
+  {key:"S13", n:13, pass:2, grp:"cr", lv:"L1", zh:"中右 V–Y 座号 13–10", en:"Centre-right pod · seats 13–10"},
+  {key:"S14", n:14, pass:2, grp:"cr", lv:"L1", zh:"中右 V–Y 座号 9–7",   en:"Centre-right pod · seats 9–7"},
+  {key:"S15", n:15, pass:2, grp:"right", lv:"L1", zh:"右侧区 M–Z",      en:"Right side · rows M–Z"},
+  {key:"S16", n:16, pass:2, grp:"cl", lv:"L1", zh:"最后一排 Z 左半",  en:"Back row Z · left half"},
+  {key:"S17", n:17, pass:2, grp:"cr", lv:"L1", zh:"最后一排 Z 右半",  en:"Back row Z · right half"},
+  {key:"S18", n:18, pass:3, grp:"up", lv:"L2", zh:"二楼 左区 A–E",    en:"Upper left · rows A–E"},
+  {key:"S19", n:19, pass:3, grp:"up", lv:"L2", zh:"二楼 中区 A–E",    en:"Upper centre · rows A–E"},
+  {key:"S20", n:20, pass:3, grp:"up", lv:"L2", zh:"二楼 右区 A–E",    en:"Upper right · rows A–E"},
+  {key:"S21", n:21, pass:3, grp:"up", lv:"L2", zh:"二楼 左区 F–K",    en:"Upper left · rows F–K"},
+  {key:"S22", n:22, pass:3, grp:"up", lv:"L2", zh:"二楼 右区 F–K",    en:"Upper right · rows F–K"}
 ];
+/* Five hues, one per seating block — chosen far apart in hue so they stay
+   distinguishable in a dim room, and never the ONLY cue for a section. */
+const GROUPS = {
+  left: {c:"#B5651D", zh:"左区",   en:"Left block"},
+  cl:   {c:"#17697F", zh:"中左区", en:"Centre-left"},
+  cr:   {c:"#6B3FA0", zh:"中右区", en:"Centre-right"},
+  right:{c:"#2C7A4B", zh:"右侧区", en:"Right side"},
+  up:   {c:"#8E2F6B", zh:"二楼",   en:"Upper level"}
+};
+const groupColor = sec => GROUPS[sec.grp].c;
+/* Blend a group hue toward white; how full the section is sets how deep it
+   goes, so hue answers "which block" and lightness answers "how full". */
+function mixWhite(hex, amt){
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  const f = v => Math.round(255 + (v - 255) * amt);
+  return "rgb(" + f(r) + "," + f(g) + "," + f(b) + ")";
+}
+function fillFor(sec){
+  const v = secVal(sec.key);
+  const ratio = v == null ? 0 : Math.min(1, v / sec.cap);
+  return {bg: mixWhite(groupColor(sec), 0.13 + 0.87 * ratio),
+          fg: ratio > 0.45 ? "#fff" : "var(--ink)"};
+}
+
 const SMAP = {};
 SECTIONS.forEach(sec => { sec.cap = SECCAP[sec.key]; SMAP[sec.key] = sec; });
 const capOf = k => SMAP[k].cap;
@@ -548,12 +589,6 @@ function setSec(k, raw){
   if(isNaN(n) || n < 0) n = 0;
   S.draft.counts[k] = n;
 }
-function heatVar(n, cap){
-  if(n == null) return "var(--heat-0)";
-  if(n === 0) return "var(--heat-0)";
-  const i = Math.min(5, Math.max(1, Math.ceil(n / cap * 5)));
-  return "var(--heat-" + i + ")";
-}
 
 /* ---------- status band ---------- */
 function renderBand(){
@@ -612,14 +647,18 @@ function renderDemo(){
 function secCard(sec){
   const v = secVal(sec.key), cap = sec.cap;
   const over = v != null && v > cap;
-  return `<div class="sc ${v != null ? "filled" : ""} ${over ? "over" : ""}">
+  return `<div class="sc ${v != null ? "filled" : ""} ${over ? "over" : ""}"
+    id="card-${sec.key}" style="--gc:${groupColor(sec)}">
     <div class="sc-hd">
       <div class="scnum">${sec.n}</div>
       <div class="bi" style="flex:1">
         <div class="nm"><span class="zh">${sec.zh}</span><span class="en">${sec.en}</span></div>
         <div class="sub">${cap} ${S.lang === "en" ? "seats" : "座"}</div>
       </div>
-      <div class="sc-pc">${v == null ? "—" : Math.round(v / cap * 100) + "%"}</div>
+      <div class="scloc">
+        ${locator(sec)}
+        <span class="grpname"><span class="zh">${GROUPS[sec.grp].zh}</span><span class="en">${GROUPS[sec.grp].en}</span></span>
+      </div>
     </div>
     <div class="entry">
       <button class="stepbtn" data-step="-1" data-k="${sec.key}"
@@ -630,7 +669,10 @@ function secCard(sec){
       <button class="stepbtn" data-step="1" data-k="${sec.key}"
         aria-label="${S.lang === "en" ? "one more" : "加一"}">+</button>
     </div>
-    <div class="bar"><i style="width:${v == null ? 0 : Math.min(100, v / cap * 100)}%"></i></div>
+    <div class="bar"><i style="width:${v == null ? 0 : Math.min(100, v / cap * 100)}%;background:${groupColor(sec)}"></i></div>
+    <div class="pcline">${v == null
+      ? bi("还没填","not counted yet")
+      : `${v} / ${cap} · ${Math.round(v / cap * 100)}%`}</div>
     ${over ? `<div class="overwarn"><span>⚠</span>${bi(
         "比座位数多 " + (v - cap) + " 人。多出来的请填在「总结」页的「站立 / 加座」。",
         (v - cap) + " more than this section has seats. Put the extra in “Standing / extra chairs” on the Summary tab.")}</div>` : ""}
@@ -641,7 +683,15 @@ function secCard(sec){
 }
 
 function viewCount(){
-  let h = "";
+  // One tap to any section beats scrolling past 22 cards, and a filled chip
+  // shows what is already counted.
+  let h = `<div class="jumpwrap">
+    <div class="jumplabel">${bi("跳到区号","Jump to a section")}</div>
+    <div class="jump">` + SECTIONS.map(sec =>
+      `<button class="jchip${secDone(sec.key) ? " on" : ""}" data-jump="${sec.key}"
+        style="--c:${groupColor(sec)}"
+        title="${S.lang === "en" ? sec.en : sec.zh}">${sec.n}</button>`).join("")
+    + `</div></div>`;
   PASSES.forEach(P => {
     const ss = SECTIONS.filter(s => passOf(s) === P.n);
     const cap = ss.reduce((t,s) => t + s.cap, 0);
@@ -711,11 +761,38 @@ function mergeCode(txt){
 /* ============================================================
    FLOOR MAP — real row geometry, tinted by each section's fill
    ============================================================ */
-function heatFg(n, cap){
-  if(n == null || n === 0) return "var(--ink-3)";
-  return Math.ceil(n / cap * 5) >= 3 ? "#fff" : "var(--ink)";
-}
 const COLW = 17, ROWH = 15;
+/* Extent of the drawn blocks on each level, so the thumbnail crops to the
+   seating and not to the stage. */
+const EXT = {};
+["l1", "l2"].forEach(k => {
+  const b = PLAN[k].boxes;
+  let r0 = 1e9, r1 = -1e9, c0 = 1e9, c1 = -1e9;
+  Object.keys(b).forEach(key => {
+    const x = b[key];
+    r0 = Math.min(r0, x[0]); r1 = Math.max(r1, x[1]);
+    c0 = Math.min(c0, x[2]); c1 = Math.max(c1, x[3]);
+  });
+  EXT[k] = [r0, r1, c0, c1];
+});
+/* A thumbnail of the level with this one block lit up — the cue that needs
+   no reading, and the one that still works for a colour-blind usher. */
+function locator(sec){
+  const lv = sec.lv === "L2" ? "l2" : "l1";
+  const P = PLAN[lv], E = EXT[lv];
+  const W = E[3] - E[2] + 1, H = E[1] - E[0] + 1;
+  const hue = groupColor(sec);
+  let r = "";
+  Object.keys(P.boxes).forEach(key => {
+    const b = P.boxes[key], cur = key === sec.key;
+    r += `<rect x="${b[2] - E[2]}" y="${b[0] - E[0]}" width="${b[3] - b[2] + 1}"
+      height="${b[1] - b[0] + 1}" rx="0.6"
+      style="fill:${cur ? hue : "var(--line)"};stroke:${cur ? hue : "var(--line-strong)"};stroke-width:.35"></rect>`;
+  });
+  return `<svg class="loc" viewBox="-0.5 -0.5 ${W + 1} ${H + 1}"
+    preserveAspectRatio="xMidYMid meet" role="img"
+    aria-label="${S.lang === "en" ? "location of section " + sec.n : "第 " + sec.n + " 区位置"}">${r}</svg>`;
+}
 function drawPlan(P, title, sub){
   const nc = P.c1 - P.c0 + 1, nr = P.r1 - P.r0 + 1;
   let h = `<div class="planwrap"><div class="plan-t"><h3>${title}</h3><span>${sub}</span></div>
@@ -746,8 +823,9 @@ function drawPlan(P, title, sub){
     runs.forEach(([c0, n0, len, key]) => {
       const sec = SMAP[key];
       if(!sec) return;
+      const f = fillFor(sec);
+      const bg = f.bg, fg = f.fg;
       const v = secVal(key);
-      const bg = heatVar(v, sec.cap), fg = heatFg(v, sec.cap);
       for(let i = 0; i < len; i++){
         h += `<button class="tpseat" data-goto="${key}"
           style="--bg:${bg};--fg:${fg};grid-column:${c0 + i - P.c0 + 1};grid-row:${gr}"
@@ -764,14 +842,13 @@ function drawPlan(P, title, sub){
     const gr = bx[0] - P.r0 + 1, gc = bx[2] - P.c0 + 1;
     const rs = bx[1] - bx[0] + 1, cs = bx[3] - bx[2] + 1;
     const fs = Math.max(13, Math.min(42, Math.min(cs * COLW, rs * ROWH) * 0.62));
-    const v = secVal(key);
-    const col = heatFg(v, sec.cap) === "#fff" ? "rgba(255,255,255,.9)" : "rgba(21,14,16,.45)";
+    const col = fillFor(sec).fg === "#fff" ? "rgba(255,255,255,.92)" : "rgba(21,14,16,.5)";
     h += `<div class="tpnum" style="grid-column:${gc}/span ${cs};grid-row:${gr}/span ${rs};
       font-size:${fs.toFixed(0)}px;color:${col}">${sec.n}</div>`;
   });
-  h += `</div><div class="legend"><span>${S.lang === "en" ? "how full" : "入座密度"}</span>
-    <span class="ramp">${[0,1,2,3,4,5].map(i => `<i style="background:var(--heat-${i})"></i>`).join("")}</span>
-    <span>0 → 100%</span></div></div>`;
+  h += `</div><div class="legend">` + Object.keys(GROUPS).map(g =>
+      `<span class="lg"><i style="background:${GROUPS[g].c}"></i><span class="zh">${GROUPS[g].zh}</span><span class="en">${GROUPS[g].en}</span></span>`).join("")
+    + `<span class="lgnote">${bi("颜色越深 = 坐得越满","deeper colour = fuller")}</span></div></div>`;
   return h;
 }
 function viewMap(){
@@ -1064,15 +1141,21 @@ function wireView(){
       touch();
     };
   });
-  // jump from the floor map to a section's input
-  V.querySelectorAll("[data-goto]").forEach(b => {
-    b.onclick = () => {
-      const k = b.dataset.goto;
-      S.tab = "count"; save(); renderTabs(); renderView();
-      const inp = $('[data-secin="' + k + '"]');
-      if(inp){ inp.scrollIntoView({block:"center", behavior:"smooth"}); inp.focus(); inp.select(); }
-    };
-  });
+  // jump from the floor map, or from a numbered chip, to a section's input
+  const goTo = k => {
+    if(S.tab !== "count"){ S.tab = "count"; save(); renderTabs(); renderView(); }
+    const card = document.getElementById("card-" + k);
+    const inp = $('[data-secin="' + k + '"]');
+    if(card){
+      card.scrollIntoView({block:"center", behavior:"smooth"});
+      // Flash the card so the usher sees which one they landed on.
+      card.classList.add("hit");
+      setTimeout(() => card.classList.remove("hit"), 1400);
+    }
+    if(inp){ inp.focus(); inp.select(); }
+  };
+  V.querySelectorAll("[data-goto]").forEach(b => { b.onclick = () => goTo(b.dataset.goto); });
+  V.querySelectorAll("[data-jump]").forEach(b => { b.onclick = () => goTo(b.dataset.jump); });
 
   on("#cp-code", () => copy(makeCode(), "数字已复制", "Numbers copied"));
   on("#do-merge", () => {
