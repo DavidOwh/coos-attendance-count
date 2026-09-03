@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#A2263C">
+<meta name="description" content="COOS 主堂主日人数点算 · Sunday attendance count for the COOS main auditorium">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="点算">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%AA%91%3C/text%3E%3C/svg%3E">
+<title>COOS Auditorium Count</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap">
+<style>
+/* Skeleton the Artifact host normally provides. */
+:root{color-scheme:light dark}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;-webkit-tap-highlight-color:transparent}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<style>
+:root{
+  --ground:#FBF8F8; --surface:#FFFFFF; --surface-2:#F6EFF0; --sunken:#F1E7E9;
+  --line:#E5D8DA; --line-strong:#CDB8BC;
+  --ink:#231A1C; --ink-2:#5D4C50; --ink-3:#8B787C;
+  --accent:#A2263C; --accent-ink:#FFFFFF; --accent-soft:#F7E7EA;
+  --ok:#2C6B4F; --ok-soft:#E5EFE9;
+  --warn:#8A5A12; --warn-soft:#F8ECDA;
+  --heat-0:#F1E6E8; --heat-1:#E7C6CC; --heat-2:#D89CA8; --heat-3:#C16B7D; --heat-4:#A2263C; --heat-5:#77132A;
+  --tick:rgba(35,26,28,.14);
+  --shadow:0 1px 2px rgba(35,26,28,.05), 0 10px 30px -16px rgba(35,26,28,.28);
+  --sans:"IBM Plex Sans","Noto Sans SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --display:"Archivo","Noto Sans SC",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#151011; --surface:#1E1719; --surface-2:#271E21; --sunken:#231A1D;
+    --line:#382B2E; --line-strong:#503E42;
+    --ink:#F3EBEC; --ink-2:#C6B4B8; --ink-3:#9B888C;
+    --accent:#E8798F; --accent-ink:#2A0D14; --accent-soft:#3A222A;
+    --ok:#74C79C; --ok-soft:#1D3129;
+    --warn:#DBA75F; --warn-soft:#33260F;
+    --heat-0:#2B2124; --heat-1:#4A2F37; --heat-2:#6E3D49; --heat-3:#95505F; --heat-4:#C36A7E; --heat-5:#E8798F;
+    --tick:rgba(243,235,236,.16);
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#151011; --surface:#1E1719; --surface-2:#271E21; --sunken:#231A1D;
+  --line:#382B2E; --line-strong:#503E42;
+  --ink:#F3EBEC; --ink-2:#C6B4B8; --ink-3:#9B888C;
+  --accent:#E8798F; --accent-ink:#2A0D14; --accent-soft:#3A222A;
+  --ok:#74C79C; --ok-soft:#1D3129;
+  --warn:#DBA75F; --warn-soft:#33260F;
+  --heat-0:#2B2124; --heat-1:#4A2F37; --heat-2:#6E3D49; --heat-3:#95505F; --heat-4:#C36A7E; --heat-5:#E8798F;
+  --tick:rgba(243,235,236,.16);
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -16px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;
+  -webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+.bi{display:flex;flex-direction:column;gap:1px;min-width:0}
+.bi .en{font-size:.76em;line-height:1.25;color:var(--ink-3);letter-spacing:.01em}
+[data-lang="zh"] .en{display:none}
+[data-lang="en"] .zh{display:none}
+[data-lang="en"] .bi .en{font-size:1em;color:inherit}
+[data-lang="both"] :not(.bi)>.zh+.en{margin-left:.4em;color:var(--ink-3);font-size:.88em}
+[data-lang="both"] .field>label>.en{font-size:1em}
+
+.wrap{max-width:1140px;margin:0 auto;padding:0 14px 90px}
+
+/* ---------- status band ---------- */
+.band{position:sticky;top:0;z-index:40;background:var(--ground);border-bottom:1px solid var(--line);
+  margin:0 -14px;padding:10px 14px 0}
+.band-in{max-width:1140px;margin:0 auto}
+.brandrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mark{font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:-.01em;
+  display:flex;align-items:baseline;gap:7px}
+.mark small{font-family:var(--mono);font-weight:400;font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-3)}
+.spacer{flex:1}
+.langsw{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--surface)}
+.langsw button{border:0;background:transparent;padding:4px 9px;font-size:11px;font-family:var(--mono);
+  letter-spacing:.06em;color:var(--ink-3);cursor:pointer}
+.langsw button[aria-pressed="true"]{background:var(--ink);color:var(--ground)}
+
+.ctx{display:flex;gap:8px;align-items:stretch;margin-top:9px;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:3px;min-width:0}
+.field>label{font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3)}
+.field input,.field select{background:var(--surface);border:1px solid var(--line);border-radius:8px;
+  padding:6px 8px;font-size:13px;min-width:0;max-width:100%}
+@media (max-height:620px){.band{position:static}}
+
+.readout{display:flex;align-items:center;gap:12px;margin:10px 0 9px;padding:11px 13px;
+  background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.dial{position:relative;flex:0 0 auto;width:56px;height:56px}
+.dial svg{display:block;width:56px;height:56px;transform:rotate(-90deg)}
+.dial b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);
+  font-weight:700;font-size:13px;letter-spacing:-.02em}
+.bignum{font-family:var(--display);font-weight:700;font-size:33px;line-height:.95;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums}
+.bignum span{font-size:15px;color:var(--ink-3);letter-spacing:0}
+.readout .meta{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.metarow{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.chip{font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;padding:2.5px 7px;border-radius:5px;
+  background:var(--sunken);color:var(--ink-2);white-space:nowrap}
+.chip.done{background:var(--ok-soft);color:var(--ok)}
+.chip.todo{background:var(--warn-soft);color:var(--warn)}
+
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding-bottom:9px}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{border:0;background:transparent;padding:7px 11px 8px;cursor:pointer;white-space:nowrap;
+  border-bottom:2px solid transparent;color:var(--ink-3);font-weight:500;font-size:13.5px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+
+.demo{display:flex;gap:10px;align-items:center;margin:14px 0 0;padding:9px 12px;border-radius:10px;
+  background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 26%,transparent);font-size:12.5px}
+.demo .bi .en{color:inherit;opacity:.72}
+
+h2.sec{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);margin:26px 0 10px;display:flex;align-items:center;gap:10px}
+h2.sec:after{content:"";flex:1;height:1px;background:var(--line)}
+h2.sec:first-of-type{margin-top:18px}
+
+/* ---------- the three passes ---------- */
+.pass{margin:0 0 24px}
+.pass-hd{display:flex;gap:12px;align-items:flex-start;padding:13px 14px;background:var(--surface);
+  border:1px solid var(--line);border-radius:12px 12px 0 0;border-bottom:0}
+.pnum{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--accent);color:var(--accent-ink);
+  display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:15px}
+.ptitle{font-weight:600;font-size:15px;letter-spacing:-.01em}
+.ptip{font-size:12.5px;color:var(--ink-2);margin-top:3px;max-width:64ch;line-height:1.5}
+.ptip .en{color:var(--ink-3)}
+.pcount{flex:0 0 auto;text-align:right;font-variant-numeric:tabular-nums}
+.pcount b{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:-.02em;display:block;line-height:1}
+.pcount i{font-family:var(--mono);font-style:normal;font-size:10.5px;color:var(--ink-3)}
+.pbar{height:4px;background:var(--sunken);border-left:1px solid var(--line);border-right:1px solid var(--line)}
+.pbar i{display:block;height:100%;background:var(--accent)}
+.chiprow{display:flex;gap:6px;flex-wrap:wrap;padding:9px 14px;background:var(--surface);
+  border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;margin-bottom:10px}
+.emptypass{padding:13px 14px;background:var(--surface-2);border:1px dashed var(--line-strong);
+  border-radius:10px;font-size:13px;color:var(--ink-2)}
+
+/* ---------- section card: one number per section ---------- */
+.secgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:10px}
+.sc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:11px 12px 12px;
+  display:flex;flex-direction:column;gap:9px}
+.sc.filled{border-color:var(--line-strong)}
+.sc.over{border-color:color-mix(in srgb,var(--warn) 55%,transparent)}
+.sc-hd{display:flex;align-items:flex-start;gap:9px}
+.sc-hd .nm{font-weight:600;font-size:14.5px}
+.sc-hd .sub{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink-3);text-transform:uppercase}
+.sc-pc{margin-left:auto;flex:0 0 auto;text-align:right;font-family:var(--mono);font-size:11px;color:var(--ink-3);
+  font-variant-numeric:tabular-nums}
+.entry{display:flex;align-items:stretch;gap:7px}
+.entry .stepbtn{flex:0 0 auto;width:42px;border:1px solid var(--line);background:var(--surface-2);
+  border-radius:9px;font-size:21px;cursor:pointer;color:var(--ink-2);line-height:1}
+.entry .stepbtn:hover{background:var(--sunken);color:var(--ink)}
+.entry input{flex:1;min-width:0;text-align:center;border:1.5px solid var(--line-strong);border-radius:9px;
+  background:var(--surface-2);font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:-.02em;
+  padding:7px 4px;font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+.entry input::-webkit-outer-spin-button,.entry input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.entry input::placeholder{color:var(--ink-3);font-weight:600;font-size:20px}
+.entry input:focus{border-color:var(--accent);background:var(--surface)}
+.bar{height:5px;border-radius:3px;background:var(--sunken);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.sc-ft{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.mini{border:1px solid var(--line);background:transparent;border-radius:7px;padding:4px 8px;font-size:11.5px;
+  cursor:pointer;color:var(--ink-2)}
+.mini:hover{border-color:var(--line-strong);color:var(--ink)}
+.mini[aria-pressed="true"]{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+.overwarn{font-size:11.5px;color:var(--warn);display:flex;gap:5px;align-items:flex-start;line-height:1.4}
+
+.btn{border:1px solid var(--line-strong);background:var(--surface-2);border-radius:8px;padding:8px 13px;
+  cursor:pointer;font-size:13px;font-weight:500}
+.btn:hover{background:var(--sunken)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.pri:hover{filter:brightness(1.07)}
+.btn.gh{border-color:var(--line);background:transparent;color:var(--ink-2)}
+.hint{font-size:11.5px;color:var(--ink-3)}
+.btnrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+
+details.fold{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+details.fold>summary{padding:11px 13px;cursor:pointer;font-weight:600;font-size:14px;list-style:none}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary:before{content:"\25B8";color:var(--ink-3);margin-right:8px;display:inline-block}
+details.fold[open]>summary:before{content:"\25BE"}
+details.fold>.fb{padding:12px 13px 13px;border-top:1px solid var(--line)}
+
+/* ---------- floor map ---------- */
+.plan{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;overflow-x:auto}
+.plan-t{display:flex;align-items:baseline;gap:9px;margin-bottom:11px}
+.plan-t h3{font-family:var(--display);font-weight:700;font-size:15px;margin:0;letter-spacing:-.01em}
+.plan-t span{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.stage{background:var(--sunken);border:1px solid var(--line);border-radius:6px;text-align:center;
+  font-family:var(--mono);font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-3);
+  padding:9px 0;margin-bottom:9px}
+.mapgrid{display:grid;gap:2px 5px;min-width:540px;align-items:center}
+.rl{font-family:var(--mono);font-size:9.5px;color:var(--ink-3);text-align:center;line-height:1}
+.cell{display:flex;justify-content:center}
+.rowbar{border:0;height:14px;border-radius:2.5px;cursor:pointer;padding:0;
+  background-color:var(--bg);
+  background-image:repeating-linear-gradient(90deg,transparent 0,transparent calc(100%/var(--n) - 1px),var(--tick) calc(100%/var(--n) - 1px),var(--tick) calc(100%/var(--n)));
+  box-shadow:inset 0 0 0 1px var(--tick)}
+.rowbar:hover{box-shadow:inset 0 0 0 1px var(--ink-3)}
+.colhd{font-family:var(--mono);font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);
+  text-align:center;padding-bottom:3px}
+.entrance{font-family:var(--mono);font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+  text-align:right;padding-top:6px}
+.legend{display:flex;align-items:center;gap:7px;margin-top:12px;font-family:var(--mono);font-size:9.5px;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);flex-wrap:wrap}
+.ramp{display:flex;gap:2px}
+.ramp i{width:19px;height:9px;border-radius:2px;display:block}
+.seclist{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:7px;margin-top:12px}
+.sl{display:flex;align-items:center;gap:8px;font-size:12.5px}
+.sl .sw{width:11px;height:11px;border-radius:3px;flex:0 0 auto;background:var(--bg);
+  box-shadow:inset 0 0 0 1px var(--tick)}
+.sl .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sl .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:12px;color:var(--ink-2)}
+
+/* ---------- tables ---------- */
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl th,.tbl td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line)}
+.tbl th{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:400}
+.tbl td.n,.tbl th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:13px}
+.tbl tr.grp td{background:var(--surface-2);font-weight:600}
+.tbl tr.tot td{border-top:2px solid var(--line-strong);border-bottom:0;font-weight:600;padding-top:9px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.panel>.pt{padding:11px 13px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px}
+.panel>.pt strong{font-size:14px}
+.panel>.pb{padding:11px 13px}
+.extras{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:9px}
+.ex{display:flex;flex-direction:column;gap:4px}
+.ex label{font-size:11.5px;color:var(--ink-2)}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface-2)}
+.stepper button{border:0;background:transparent;width:32px;height:34px;cursor:pointer;font-size:17px;color:var(--ink-2)}
+.stepper button:hover{background:var(--sunken);color:var(--ink)}
+.stepper input{border:0;background:transparent;text-align:center;width:100%;min-width:0;
+  font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:14px;padding:0}
+textarea.note{width:100%;border:1px solid var(--line);border-radius:8px;background:var(--surface-2);
+  padding:8px 10px;font-size:13.5px;resize:vertical;min-height:62px}
+pre.out{background:var(--sunken);border:1px solid var(--line);border-radius:8px;padding:10px 11px;
+  font-family:var(--mono);font-size:11.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;margin:0;
+  max-height:220px;overflow:auto}
+.twocol{display:grid;grid-template-columns:1fr;gap:10px}
+@media (min-width:900px){.twocol{grid-template-columns:1fr 1fr}}
+
+.trend{display:block;width:100%;height:auto}
+.hlist{display:flex;flex-direction:column}
+.hitem{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.hitem:last-child{border-bottom:0}
+.hitem .d{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);flex:0 0 auto}
+.hitem .s{font-size:12.5px;color:var(--ink-3);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hitem .v{font-family:var(--display);font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
+.hitem .p{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);width:42px;text-align:right}
+
+/* ---------- tap counter ---------- */
+.tapwrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding:20px 14px 24px;
+  background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.tapwrap .n{font-family:var(--display);font-weight:700;font-size:62px;line-height:1;letter-spacing:-.04em;
+  font-variant-numeric:tabular-nums}
+.tapbig{width:min(100%,300px);height:108px;border-radius:16px;border:1px solid var(--accent);
+  background:var(--accent);color:var(--accent-ink);font-family:var(--display);font-weight:700;font-size:22px;
+  cursor:pointer;transition:transform .06s ease}
+.tapbig:active{transform:scale(.975)}
+.sendrow{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;align-items:center;width:100%}
+.sendrow select{border:1px solid var(--line);border-radius:8px;background:var(--surface-2);padding:8px 9px;
+  font-size:13px;max-width:100%}
+
+.prose{max-width:66ch;font-size:14px}
+.prose h3{font-family:var(--display);font-weight:700;font-size:15.5px;margin:20px 0 6px;letter-spacing:-.01em}
+.prose h3:first-child{margin-top:0}
+.prose p{margin:0 0 9px;color:var(--ink-2)}
+.prose strong{color:var(--ink)}
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0;
+  padding:10px 13px;margin:0 0 14px}
+.callout p{margin:0;color:var(--ink)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,26px);z-index:90;background:var(--ink);
+  color:var(--ground);padding:8px 15px;border-radius:999px;font-size:12.5px;opacity:0;pointer-events:none;
+  transition:opacity .16s ease,transform .16s ease}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+
+<div class="band">
+ <div class="band-in">
+  <div class="brandrow">
+    <div class="mark">COOS <small>Auditorium Count</small></div>
+    <div class="spacer"></div>
+    <div class="langsw" id="langsw">
+      <button data-l="both" aria-pressed="true">中/EN</button>
+      <button data-l="zh" aria-pressed="false">中</button>
+      <button data-l="en" aria-pressed="false">EN</button>
+    </div>
+  </div>
+  <div class="ctx">
+    <div class="field" style="flex:1 1 128px">
+      <label><span class="zh">日期</span><span class="en">Date</span></label>
+      <input type="date" id="f-date">
+    </div>
+    <div class="field" style="flex:1 1 150px">
+      <label><span class="zh">崇拜</span><span class="en">Service</span></label>
+      <select id="f-svc"></select>
+    </div>
+    <div class="field" style="flex:0 1 108px">
+      <label><span class="zh">点算时间</span><span class="en">Count at</span></label>
+      <input type="time" id="f-time">
+    </div>
+    <div class="field" style="flex:1 1 118px">
+      <label><span class="zh">点算人</span><span class="en">Counted by</span></label>
+      <input type="text" id="f-by" placeholder="…">
+    </div>
+  </div>
+  <div class="readout">
+    <div class="dial">
+      <svg viewBox="0 0 56 56" aria-hidden="true">
+        <circle cx="28" cy="28" r="23" fill="none" stroke="var(--sunken)" stroke-width="7"></circle>
+        <circle id="dial-arc" cx="28" cy="28" r="23" fill="none" stroke="var(--accent)" stroke-width="7"
+          stroke-linecap="round" stroke-dasharray="144.5 144.5" stroke-dashoffset="144.5"></circle>
+      </svg>
+      <b id="dial-pct">0%</b>
+    </div>
+    <div class="meta">
+      <div class="bignum"><span id="ro-total">0</span> <span>/ 1176 <span class="zh">座</span><span class="en">seats</span></span></div>
+      <div class="metarow" id="ro-chips"></div>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+ </div>
+</div>
+
+<div class="wrap">
+  <div id="demo-banner"></div>
+  <main id="view"></main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   COOS main auditorium — Sunday attendance count.
+
+   The usher counts a whole section with a hand clicker, then types
+   that one number in. Section capacities below are summed from
+   per-row seat counts read off "Floor Plan of Main Auditorium"
+   (updated 2022-08-25); they reconcile exactly with the totals
+   printed on that plan: Level 1 836 + Level 2 340 = 1176.
+   ============================================================ */
+const CAP_TOTAL = 1176;
+
+function rws(letters, cap){ return letters.split(" ").map(L => [L, cap]); }
+
+/* Per-row seat counts, by seating block. Kept because the floor map is
+   drawn from them and every section capacity is derived from them —
+   one source of truth for the seat figures. */
+const BLOCKROWS = {
+  left:   [["A",9],["B",9],["C",7],["D",8],["E",10],["F",10],["G",8],["H",10],
+           ["N",10],["P",10],["Q",10],["R",7],["S",10],["T",10]],
+  cleft:  rws("A B C D E F G H J K L M N P Q R S T",14).concat(rws("V W X Y",11)),
+  cright: rws("A B C D E F G H J K L M N P Q R S T",14).concat(rws("V W X Y",11)),
+  right:  rws("B C M N P Q R S T U V W X Y Z",6),
+  zrow:   [["Z-L",13],["Z-R",13]],
+  l2left: rws("A B C D E",10).concat(rws("F G H J K",16)),
+  l2mid:  rws("A B C D E",15),
+  l2right:rws("A B C D E",11).concat(rws("F G H J K",16))
+};
+function blockRowCap(block, label){
+  const r = (BLOCKROWS[block] || []).find(x => x[0] === label);
+  return r ? r[1] : 0;
+}
+
+/* One number per section — twelve of them. Sections follow the seating
+   blocks an usher can actually walk and see, split so no clicker run is
+   longer than about 170 seats. */
+const SECTIONS = [
+  {key:"L1-L",   pass:1, lv:"L1", zh:"左区 A–T",      en:"Left block, rows A–T",
+   parts:[["left","A B C D E F G H N P Q R S T"]]},
+  {key:"L1-CLF", pass:1, lv:"L1", zh:"中左 前段 A–M", en:"Centre-left, rows A–M",
+   parts:[["cleft","A B C D E F G H J K L M"]]},
+  {key:"L1-CLR", pass:1, lv:"L1", zh:"中左 后段 N–T", en:"Centre-left, rows N–T",
+   parts:[["cleft","N P Q R S T"]]},
+  {key:"L1-CRF", pass:1, lv:"L1", zh:"中右 前段 A–M", en:"Centre-right, rows A–M",
+   parts:[["cright","A B C D E F G H J K L M"]]},
+  {key:"L1-CRR", pass:1, lv:"L1", zh:"中右 后段 N–T", en:"Centre-right, rows N–T",
+   parts:[["cright","N P Q R S T"]]},
+  {key:"L1-CLB", pass:2, lv:"L1", zh:"中左 末段 V–Y", en:"Centre-left back, rows V–Y",
+   parts:[["cleft","V W X Y"]]},
+  {key:"L1-CRB", pass:2, lv:"L1", zh:"中右 末段 V–Y", en:"Centre-right back, rows V–Y",
+   parts:[["cright","V W X Y"]]},
+  {key:"L1-RS",  pass:2, lv:"L1", zh:"右侧区 座号 1–6", en:"Right side, seats 1–6",
+   parts:[["right","B C M N P Q R S T U V W X Y Z"]]},
+  {key:"L1-Z",   pass:2, lv:"L1", zh:"最后一排 Z",    en:"Back row Z",
+   parts:[["zrow","Z-L Z-R"]]},
+  {key:"L2-L",   pass:3, lv:"L2", zh:"二楼 左区",     en:"Upper left",
+   parts:[["l2left","A B C D E F G H J K"]]},
+  {key:"L2-C",   pass:3, lv:"L2", zh:"二楼 中区",     en:"Upper centre",
+   parts:[["l2mid","A B C D E"]]},
+  {key:"L2-R",   pass:3, lv:"L2", zh:"二楼 右区",     en:"Upper right",
+   parts:[["l2right","A B C D E F G H J K"]]}
+];
+const SMAP = {};
+SECTIONS.forEach(sec => {
+  sec.cap = sec.parts.reduce((t,[block,labels]) =>
+    t + labels.split(" ").reduce((a,L) => a + blockRowCap(block, L), 0), 0);
+  SMAP[sec.key] = sec;
+});
+const capOf = k => SMAP[k].cap;
+
+/* (block,row) -> section key, for drawing the floor map. */
+const ROW2SEC = {};
+SECTIONS.forEach(sec => sec.parts.forEach(([block,labels]) =>
+  labels.split(" ").forEach(L => { (ROW2SEC[block] = ROW2SEC[block] || {})[L] = sec.key; })));
+
+const PASSES = [
+  {n:1,
+   zh:"第一遍 · 在二楼看台点算一楼",
+   en:"Pass 1 · Count Level 1 from the balcony",
+   tzh:"站在二楼栏杆旁，用计数器数完一区，把数字填进那一区的格子。靠讲台的前几排从上面最难数 —— 那几区按「数空位」，数空椅子比数人头准得多。",
+   ten:"Stand at the balcony rail, click through one section, then type that number into its box. The front rows nearest the stage are hardest from above — tap “Empties” for those and click empty chairs instead of heads."},
+  {n:2,
+   zh:"第二遍 · 走到一楼后方点算",
+   en:"Pass 2 · Walk to the rear of Level 1",
+   tzh:"二楼看台正下方的座位从上面看不见。讲道中走下去，靠近那几区数。若发现还有别的区从上面看不清，按该区的「看不见」把它移到这一遍 —— 设定会记住。",
+   ten:"The seats tucked under the balcony can't be seen from above. Walk down during the sermon and count those sections up close. If another section turns out to be hard to see, tap “Hidden” on it to move it into this pass — the setting is remembered."},
+  {n:3,
+   zh:"第三遍 · 二楼（你站的这一层）",
+   en:"Pass 3 · Level 2, where you're standing",
+   tzh:"回到二楼数这一层。就在你眼前，最容易，留到最后做。",
+   ten:"Back upstairs, count this level. It's right in front of you — the easiest, so leave it for last."}
+];
+function passOf(sec){ return sec.lv === "L2" ? 3 : (S.hidden[sec.key] ? 2 : 1); }
+
+const EXTRAS = [
+  {key:"child",   zh:"儿童主日学",        en:"Children's church"},
+  {key:"nursery", zh:"婴幼儿室",          en:"Nursery / cry room"},
+  {key:"serving", zh:"服事同工(未入座)",  en:"Serving team (not seated)"},
+  {key:"standing",zh:"站立 / 加座",       en:"Standing / extra chairs"},
+  {key:"online",  zh:"线上参与",          en:"Online (not on-site)"}
+];
+
+/* ============================================================ */
+const STORE = "coos-count-v3";
+const OLD_STORE = "coos-count-v2";
+const SERVICES_DEFAULT = ["主日华语崇拜 2:00pm · Sunday Chinese Service"];
+const HIDDEN_DEFAULT = ["L1-CLB","L1-CRB","L1-RS","L1-Z"];
+const todayISO = () => new Date().toLocaleDateString("en-CA");
+
+function blankCounts(){ const c = {}; SECTIONS.forEach(s => c[s.key] = null); return c; }
+function blankExtras(){ const e = {}; EXTRAS.forEach(x => e[x.key] = 0); return e; }
+function freshDraft(keepSvc, keepBy){
+  return {date:todayISO(), svc:keepSvc || SERVICES_DEFAULT[0], time:"", by:keepBy || "",
+          counts:blankCounts(), empties:{}, extras:blankExtras(), note:"", tap:0, tapTo:""};
+}
+
+/* Opens showing one plausible Sunday so the totals, map and trend are
+   visible at a glance. Banner-marked, and one tap clears it. */
+function demoDraft(){
+  const c = blankCounts();
+  c["L1-L"] = 92; c["L1-CLF"] = 141; c["L1-CLR"] = 58; c["L1-CRF"] = 136; c["L1-CRR"] = 61;
+  c["L1-CLB"] = 19; c["L1-CRB"] = 16; c["L1-RS"] = 44; c["L1-Z"] = 9;
+  c["L2-L"] = 47; c["L2-C"] = 38; c["L2-R"] = 43;
+  const e = blankExtras();
+  e.child = 62; e.nursery = 11; e.serving = 24; e.standing = 0; e.online = 138;
+  return {date:todayISO(), svc:SERVICES_DEFAULT[0], time:"14:45", by:"",
+          counts:c, empties:{}, extras:e, note:"", tap:0, tapTo:""};
+}
+function demoHistory(){
+  const mk = (d,seated,ex) => ({id:"demo-"+d, demo:true, date:d, svc:SERVICES_DEFAULT[0], time:"14:45",
+    by:"", seated:seated, extras:ex, note:"", saved:d+"T15:00:00"});
+  return [
+    mk("2026-08-09", 742, {child:58,nursery:9, serving:24,standing:0,online:151}),
+    mk("2026-08-16", 705, {child:54,nursery:12,serving:23,standing:0,online:162}),
+    mk("2026-08-23", 781, {child:66,nursery:10,serving:25,standing:8,online:144}),
+    mk("2026-08-30", 698, {child:51,nursery:8, serving:22,standing:0,online:170})
+  ];
+}
+
+let S;
+function load(){
+  try{ const raw = localStorage.getItem(STORE); if(raw) S = JSON.parse(raw); }
+  catch(e){ S = null; }
+  if(!S || !S.draft){
+    S = {lang:"both", tab:"count", demo:true, services:SERVICES_DEFAULT.slice(),
+         hidden:{}, draft:demoDraft(), history:demoHistory()};
+    // Carry across anything already filed under the previous version. History
+    // records store totals, not per-section numbers, so they transfer cleanly.
+    try{
+      const old = JSON.parse(localStorage.getItem(OLD_STORE) || "null");
+      if(old && Array.isArray(old.history)){
+        const real = old.history.filter(r => !r.demo);
+        if(real.length){ S.history = real; S.demo = true; }
+      }
+      if(old && old.lang) S.lang = old.lang;
+      if(old && old.draft && old.draft.by) S.draft.by = old.draft.by;
+    }catch(e){}
+  }
+  S.services = SERVICES_DEFAULT.slice();
+  S.draft.svc = SERVICES_DEFAULT[0];
+  S.draft.counts = Object.assign(blankCounts(), S.draft.counts || {});
+  S.draft.extras = Object.assign(blankExtras(), S.draft.extras || {});
+  S.draft.empties = S.draft.empties || {};
+  S.history = S.history || [];
+  S.hidden = S.hidden || {};
+  if(S.hiddenSeed !== "v1"){
+    S.hidden = {}; HIDDEN_DEFAULT.forEach(k => { S.hidden[k] = true; });
+    S.hiddenSeed = "v1"; save();
+  }
+}
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(S)); }catch(e){} }
+load();
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const bi = (zh,en) => `<span class="bi"><span class="zh">${zh}</span><span class="en">${en}</span></span>`;
+
+function blobSave(name, text){
+  try{
+    const b = new Blob([text], {type:"text/csv;charset=utf-8"});
+    const u = URL.createObjectURL(b);
+    const a = document.createElement("a");
+    a.href = u; a.download = name; a.style.display = "none";
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { a.remove(); URL.revokeObjectURL(u); }, 1500);
+    return true;
+  }catch(e){ return false; }
+}
+let toastT;
+function toast(zh,en){
+  const t = $("#toast"); t.innerHTML = bi(zh,en); t.classList.add("on");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 1900);
+}
+function copy(text, zh, en){
+  const done = () => toast(zh || "已复制", en || "Copied");
+  const fallback = () => {
+    const ta = document.createElement("textarea"); ta.value = text;
+    ta.style.position = "fixed"; ta.style.top = "-999px"; document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand("copy"); done(); }
+    catch(e){ toast("复制失败，请手动选取", "Copy failed — select the text manually"); }
+    ta.remove();
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText)
+    navigator.clipboard.writeText(text).then(done, fallback);
+  else fallback();
+}
+
+/* ---------- totals ---------- */
+const secVal = k => S.draft.counts[k];
+const secDone = k => secVal(k) != null;
+function seated(){ return SECTIONS.reduce((t,s) => t + (secVal(s.key) || 0), 0); }
+function levelSum(lv){ return SECTIONS.filter(s => s.lv === lv).reduce((t,s) => t + (secVal(s.key) || 0), 0); }
+function levelCap(lv){ return SECTIONS.filter(s => s.lv === lv).reduce((t,s) => t + s.cap, 0); }
+function onsite(){ const e = S.draft.extras; return seated() + e.child + e.nursery + e.serving + e.standing; }
+const doneCount = () => SECTIONS.filter(s => secDone(s.key)).length;
+
+/* What the input box shows: people, or empty chairs if that section is
+   being counted the other way round. */
+function inputVal(k){
+  const v = secVal(k);
+  if(v == null) return "";
+  return S.draft.empties[k] ? Math.max(0, capOf(k) - v) : v;
+}
+function setSec(k, raw){
+  const t = String(raw).trim();
+  if(t === ""){ S.draft.counts[k] = null; return; }
+  let n = parseInt(t, 10);
+  if(isNaN(n) || n < 0) n = 0;
+  const cap = capOf(k);
+  S.draft.counts[k] = S.draft.empties[k] ? Math.max(0, cap - Math.min(n, cap)) : n;
+}
+function heatVar(n, cap){
+  if(n == null) return "var(--heat-0)";
+  if(n === 0) return "var(--heat-0)";
+  const i = Math.min(5, Math.max(1, Math.ceil(n / cap * 5)));
+  return "var(--heat-" + i + ")";
+}
+
+/* ---------- status band ---------- */
+function renderBand(){
+  const st = seated(), pct = Math.round(st / CAP_TOTAL * 100);
+  $("#ro-total").textContent = st.toLocaleString();
+  $("#dial-pct").textContent = pct + "%";
+  const C = 2 * Math.PI * 23;
+  const arc = $("#dial-arc");
+  arc.setAttribute("stroke-dasharray", C.toFixed(1) + " " + C.toFixed(1));
+  arc.setAttribute("stroke-dashoffset", (C * (1 - Math.min(1, st / CAP_TOTAL))).toFixed(1));
+  const e = S.draft.extras, d = doneCount();
+  $("#ro-chips").innerHTML =
+    `<span class="chip ${d === SECTIONS.length ? "done" : "todo"}">${d}/${SECTIONS.length} ${S.lang === "en" ? "sections" : "区"}</span>` +
+    `<span class="chip">L1 ${levelSum("L1")}</span><span class="chip">L2 ${levelSum("L2")}</span>` +
+    `<span class="chip">${S.lang === "en" ? "on-site" : "现场"} ${onsite()}</span>` +
+    (e.online ? `<span class="chip">${S.lang === "en" ? "online" : "线上"} ${e.online}</span>` : "");
+}
+
+/* ---------- tabs ---------- */
+const TABS = [
+  {id:"count",   zh:"点算",     en:"Count"},
+  {id:"map",     zh:"座位图",   en:"Floor map"},
+  {id:"summary", zh:"总结",     en:"Summary"},
+  {id:"history", zh:"记录",     en:"History"},
+  {id:"tap",     zh:"手机计数器",en:"Tap counter"},
+  {id:"help",    zh:"做法说明", en:"How to use"}
+];
+function renderTabs(){
+  $("#tabs").innerHTML = TABS.map(t =>
+    `<button role="tab" data-t="${t.id}" aria-selected="${S.tab === t.id}">${bi(t.zh, t.en)}</button>`).join("");
+}
+$("#tabs").addEventListener("click", ev => {
+  const b = ev.target.closest("button[data-t]"); if(!b) return;
+  S.tab = b.dataset.t; save(); renderTabs(); renderView(); window.scrollTo({top:0});
+});
+
+/* ---------- demo banner ---------- */
+function renderDemo(){
+  $("#demo-banner").innerHTML = S.demo
+    ? `<div class="demo">${bi("这是示例数字，让你看到填完后的样子。","Example numbers, so you can see what a finished count looks like.")}
+        <div class="spacer"></div>
+        <button class="btn pri" id="clear-demo">${bi("清空开始实际点算","Clear &amp; start real count")}</button></div>`
+    : "";
+  const b = $("#clear-demo");
+  if(b) b.onclick = () => {
+    S.demo = false;
+    S.draft = freshDraft(S.draft.svc, S.draft.by);
+    S.history = S.history.filter(h => !h.demo);
+    save(); renderAll(); toast("已清空，可开始点算", "Cleared — ready to count");
+  };
+}
+
+/* ============================================================
+   COUNT TAB — one number per section
+   ============================================================ */
+function secCard(sec){
+  const v = secVal(sec.key), cap = sec.cap;
+  const emp = !!S.draft.empties[sec.key], hid = !!S.hidden[sec.key];
+  const over = v != null && v > cap;
+  return `<div class="sc ${v != null ? "filled" : ""} ${over ? "over" : ""}">
+    <div class="sc-hd">
+      <div class="bi" style="flex:1">
+        <div class="nm"><span class="zh">${sec.zh}</span><span class="en">${sec.en}</span></div>
+        <div class="sub">${sec.key} · ${cap} ${S.lang === "en" ? "seats" : "座"}</div>
+      </div>
+      <div class="sc-pc">${v == null ? "—" : Math.round(v / cap * 100) + "%"}</div>
+    </div>
+    <div class="entry">
+      <button class="stepbtn" data-step="-1" data-k="${sec.key}"
+        aria-label="${S.lang === "en" ? "one fewer" : "减一"}">−</button>
+      <input type="number" inputmode="numeric" min="0" data-secin="${sec.key}"
+        value="${inputVal(sec.key)}" placeholder="${emp ? (S.lang === "en" ? "empty" : "空位") : (S.lang === "en" ? "people" : "人数")}"
+        aria-label="${sec.zh} ${emp ? (S.lang === "en" ? "empty chairs" : "空椅子") : (S.lang === "en" ? "people" : "人数")}">
+      <button class="stepbtn" data-step="1" data-k="${sec.key}"
+        aria-label="${S.lang === "en" ? "one more" : "加一"}">+</button>
+    </div>
+    <div class="bar"><i style="width:${v == null ? 0 : Math.min(100, v / cap * 100)}%"></i></div>
+    ${over ? `<div class="overwarn"><span>⚠</span>${bi(
+        "比座位数多 " + (v - cap) + " 人。多出来的请填在「总结」页的「站立 / 加座」。",
+        (v - cap) + " more than this section has seats. Put the extra in “Standing / extra chairs” on the Summary tab.")}</div>` : ""}
+    <div class="sc-ft">
+      <button class="mini" data-act="zero" data-k="${sec.key}">${bi("空 0","Empty")}</button>
+      <button class="mini" data-act="full" data-k="${sec.key}">${bi("满座","Full")}</button>
+      <button class="mini" data-act="clr"  data-k="${sec.key}">${bi("清除","Clear")}</button>
+      <button class="mini" data-act="emp"  data-k="${sec.key}" aria-pressed="${emp}"
+        title="${S.lang === "en" ? "Type empty chairs instead of people" : "改成输入空椅子数量"}">${bi("数空位","Empties")}</button>` +
+      (sec.lv === "L1" ? `<button class="mini" data-act="hid" data-k="${sec.key}" aria-pressed="${hid}"
+        title="${S.lang === "en" ? "Move between pass 1 and pass 2" : "在第一遍与第二遍之间移动"}">${bi("看不见","Hidden")}</button>` : "") +
+    `</div>
+  </div>`;
+}
+
+function viewCount(){
+  let h = "";
+  PASSES.forEach(P => {
+    const ss = SECTIONS.filter(s => passOf(s) === P.n);
+    const cap = ss.reduce((t,s) => t + s.cap, 0);
+    const sum = ss.reduce((t,s) => t + (secVal(s.key) || 0), 0);
+    const done = ss.filter(s => secDone(s.key)).length;
+    h += `<div class="pass">
+      <div class="pass-hd">
+        <div class="pnum">${P.n}</div>
+        <div style="flex:1;min-width:0">
+          <div class="ptitle"><span class="zh">${P.zh}</span><span class="en">${P.en}</span></div>
+          <div class="ptip"><span class="zh">${P.tzh}</span><span class="en">${P.ten}</span></div>
+        </div>
+        <div class="pcount"><b>${sum}</b><i>/ ${cap} ${S.lang === "en" ? "seats" : "座"}</i></div>
+      </div>
+      <div class="pbar"><i style="width:${cap ? Math.min(100, sum / cap * 100) : 0}%"></i></div>
+      <div class="chiprow">
+        <span class="chip ${ss.length && done === ss.length ? "done" : "todo"}">${done}/${ss.length} ${S.lang === "en" ? "sections filled" : "区已填"}</span>
+        <span class="chip">${cap ? Math.round(sum / cap * 100) : 0}%</span>
+      </div>`;
+    h += ss.length
+      ? `<div class="secgrid">` + ss.map(secCard).join("") + `</div>`
+      : `<div class="emptypass">${bi("这一遍目前没有区域。按其他区的「看不见」可以把它移到这里。",
+          "Nothing in this pass right now. Tap “Hidden” on a section to move it here.")}</div>`;
+    h += `</div>`;
+  });
+
+  h += `<h2 class="sec">${bi("两人以上分工（可选）","Splitting it between people (optional)")}</h2>
+    <details class="fold"><summary>${S.lang === "en" ? "Send and merge numbers between phones" : "在不同手机之间传送与合并数字"}</summary>
+      <div class="fb">
+        <p class="hint" style="margin:0 0 10px">${bi("一个人点算全场时不需要用这个。若有第二位招待帮你数某几区，他按「复制我的数字」贴进招待群，你在下面合并。",
+          "You don't need this when one person counts the whole room. If a second usher helps with some sections, they press “Copy my numbers” and paste it to the group; you merge it below.")}</p>
+        <div class="twocol">
+          <div>
+            <div class="hint" style="margin-bottom:5px">${bi("我的数字","My numbers")}</div>
+            <pre class="out">${esc(makeCode())}</pre>
+            <div class="btnrow"><button class="btn" id="cp-code">${bi("复制我的数字","Copy my numbers")}</button></div>
+          </div>
+          <div>
+            <div class="hint" style="margin-bottom:5px">${bi("贴上别人的数字","Paste someone else's")}</div>
+            <textarea class="note" id="mergebox" placeholder="COOS3~…"></textarea>
+            <div class="btnrow"><button class="btn" id="do-merge">${bi("合并","Merge")}</button></div>
+          </div>
+        </div>
+      </div></details>`;
+  return h;
+}
+
+function makeCode(){
+  const d = S.draft;
+  const parts = SECTIONS.filter(s => secDone(s.key)).map(s => s.key + ":" + secVal(s.key));
+  return ["COOS3", d.date || "", d.time || "", (d.by || "").replace(/[~|]/g,"")].concat(parts).join("~");
+}
+function mergeCode(txt){
+  const bits = String(txt).trim().split("~").map(x => x.trim()).filter(Boolean);
+  if(!bits.length || bits[0] !== "COOS3") return {ok:false};
+  let n = 0;
+  bits.slice(4).forEach(p => {
+    const ix = p.indexOf(":"); if(ix < 0) return;
+    const key = p.slice(0, ix);
+    if(!SMAP[key]) return;
+    const v = parseInt(p.slice(ix + 1), 10);
+    if(!isNaN(v) && v >= 0){ S.draft.counts[key] = v; n++; }
+  });
+  return {ok:n > 0, n:n};
+}
+
+/* ============================================================
+   FLOOR MAP — real row geometry, tinted by each section's fill
+   ============================================================ */
+const L1_ROWS = "A B C D E F G H J K L M N P Q R S T U V W X Y Z".split(" ");
+const L2_ROWS = "A B C D E F G H J K".split(" ");
+const L1_COLS = [
+  {block:"left",   zh:"左区",   en:"Left",     max:10},
+  {block:"cleft",  zh:"中左区", en:"Centre-L", max:14},
+  {block:"cright", zh:"中右区", en:"Centre-R", max:14},
+  {block:"right",  zh:"右侧",   en:"Right",    max:6}
+];
+const L2_COLS = [
+  {block:"l2left", zh:"左区", en:"Left",   max:16},
+  {block:"l2mid",  zh:"中区", en:"Centre", max:15},
+  {block:"l2right",zh:"右区", en:"Right",  max:16}
+];
+
+function planGrid(cols, rowLabels, title, sub, stageTop){
+  const fr = cols.map(c => c.max + "fr").join(" ");
+  let h = `<div class="plan"><div class="plan-t"><h3>${title}</h3><span>${sub}</span></div>`;
+  if(stageTop) h += `<div class="stage">${S.lang === "en" ? "Stage" : "讲台 Stage"}</div>`;
+  h += `<div class="mapgrid" style="grid-template-columns:16px ${fr} 16px">`;
+  h += `<div></div>` + cols.map(c =>
+    `<div class="colhd"><span class="zh">${c.zh}</span><span class="en">${c.en}</span></div>`).join("") + `<div></div>`;
+  rowLabels.forEach(L => {
+    h += `<div class="rl">${L}</div>`;
+    cols.forEach(c => {
+      // Row Z spans the centre of Level 1 as two halves in the plan.
+      const label = (L === "Z" && (c.block === "cleft" || c.block === "cright"))
+        ? (c.block === "cleft" ? "Z-L" : "Z-R") : L;
+      const blk = (L === "Z" && (c.block === "cleft" || c.block === "cright")) ? "zrow" : c.block;
+      const secKey = (ROW2SEC[blk] || {})[label];
+      const cap = blockRowCap(blk, label);
+      if(!secKey || !cap){ h += `<div class="cell"></div>`; return; }
+      const sec = SMAP[secKey], v = secVal(secKey);
+      h += `<div class="cell"><button class="rowbar" data-goto="${secKey}"
+        style="--bg:${heatVar(v, sec.cap)};--n:${cap};width:${(cap / c.max * 100).toFixed(1)}%"
+        title="${L} · ${S.lang === "en" ? sec.en : sec.zh} · ${v == null ? (S.lang === "en" ? "not counted" : "未点算") : v + "/" + sec.cap}"
+        aria-label="${sec.zh} ${L}"></button></div>`;
+    });
+    h += `<div class="rl">${L}</div>`;
+  });
+  h += `</div>`;
+  if(!stageTop) h += `<div class="entrance">${S.lang === "en" ? "Main entrance ↑" : "↑ 主入口 Main entrance"}</div>`;
+  h += `<div class="legend"><span>${S.lang === "en" ? "how full" : "入座密度"}</span>
+    <span class="ramp">${[0,1,2,3,4,5].map(i => `<i style="background:var(--heat-${i})"></i>`).join("")}</span>
+    <span>0 → 100%</span></div>`;
+  return h + `</div>`;
+}
+function secLegend(lv){
+  return `<div class="seclist">` + SECTIONS.filter(s => s.lv === lv).map(s => {
+    const v = secVal(s.key);
+    return `<div class="sl"><span class="sw" style="--bg:${heatVar(v, s.cap)}"></span>
+      <span class="t">${S.lang === "en" ? s.en : s.zh}</span>
+      <span class="v">${v == null ? "—" : v} / ${s.cap}</span></div>`;
+  }).join("") + `</div>`;
+}
+function viewMap(){
+  return `<h2 class="sec">${bi("一楼 主堂 · 836 座","Level 1 · Main · 836 seats")}<span class="chip">${levelSum("L1")}</span></h2>`
+    + planGrid(L1_COLS, L1_ROWS, "Main Auditorium", "Level 1 · " + levelSum("L1") + "/836", true)
+    + secLegend("L1")
+    + `<h2 class="sec">${bi("二楼 副堂 · 340 座","Level 2 · Upper · 340 seats")}<span class="chip">${levelSum("L2")}</span></h2>`
+    + planGrid(L2_COLS, L2_ROWS, "Upper Auditorium", "Level 2 · " + levelSum("L2") + "/340", false)
+    + secLegend("L2")
+    + `<p class="hint" style="margin:12px 0 0">${bi("颜色是整区的密度 —— 点算是按区的，不是按排的。点一下任何一区可以跳去填它的数字。",
+        "The colour is the whole section's density — counting is by section, not by row. Tap any section to jump to its number.")}</p>`;
+}
+
+/* ============================================================
+   SUMMARY
+   ============================================================ */
+function viewSummary(){
+  const st = seated(), e = S.draft.extras;
+  let h = `<h2 class="sec">${bi("分区人数","By section")}</h2>
+   <div class="panel"><div class="pb" style="overflow-x:auto"><table class="tbl"><thead><tr>
+     <th>${S.lang === "en" ? "Section" : "区域"}</th><th class="n">${S.lang === "en" ? "People" : "人数"}</th>
+     <th class="n">${S.lang === "en" ? "Seats" : "座位"}</th><th class="n">%</th></tr></thead><tbody>`;
+  [1,2,3].forEach(pn => {
+    const P = PASSES[pn - 1];
+    const ss = SECTIONS.filter(s => passOf(s) === pn);
+    if(!ss.length) return;
+    h += `<tr class="grp"><td colspan="4">${pn} · ${S.lang === "en" ? P.en.replace(/^Pass \d+ · /,"") : P.zh.replace(/^第.遍 · /,"")}</td></tr>`;
+    ss.forEach(s => {
+      const v = secVal(s.key);
+      h += `<tr><td>${S.lang === "en" ? s.en : s.zh}</td><td class="n">${v == null ? "–" : v}</td>
+        <td class="n" style="color:var(--ink-3)">${s.cap}</td>
+        <td class="n">${v == null ? "–" : Math.round(v / s.cap * 100) + "%"}</td></tr>`;
+    });
+  });
+  h += `<tr><td style="font-weight:600">${S.lang === "en" ? "Level 1 subtotal" : "一楼小计"}</td>
+      <td class="n" style="font-weight:600">${levelSum("L1")}</td>
+      <td class="n" style="color:var(--ink-3)">836</td><td class="n">${Math.round(levelSum("L1") / 836 * 100)}%</td></tr>
+    <tr><td style="font-weight:600">${S.lang === "en" ? "Level 2 subtotal" : "二楼小计"}</td>
+      <td class="n" style="font-weight:600">${levelSum("L2")}</td>
+      <td class="n" style="color:var(--ink-3)">340</td><td class="n">${Math.round(levelSum("L2") / 340 * 100)}%</td></tr>
+    <tr class="tot"><td>${S.lang === "en" ? "Seated in auditorium" : "礼堂座位人数"}</td><td class="n">${st}</td>
+      <td class="n" style="color:var(--ink-3)">1176</td><td class="n">${Math.round(st / CAP_TOTAL * 100)}%</td></tr>
+    </tbody></table></div></div>`;
+
+  h += `<h2 class="sec">${bi("礼堂以外","Outside the auditorium")}</h2>
+    <div class="panel"><div class="pb"><div class="extras">` +
+    EXTRAS.map(x => `<div class="ex">
+      <label><span class="zh">${x.zh}</span><span class="en">${x.en}</span></label>
+      <div class="stepper"><button data-ex="${x.key}" data-d="-1" aria-label="−">−</button>
+      <input type="number" inputmode="numeric" min="0" data-exin="${x.key}" value="${e[x.key]}">
+      <button data-ex="${x.key}" data-d="1" aria-label="+">+</button></div></div>`).join("") +
+    `</div>
+    <div style="margin-top:12px"><label class="hint" for="notebox">${S.lang === "en" ? "Notes (weather, special event, anything unusual)" : "备注（天气、特别聚会、异常情况）"}</label>
+    <textarea class="note" id="notebox" style="margin-top:5px">${esc(S.draft.note || "")}</textarea></div>
+    </div></div>`;
+
+  h += `<h2 class="sec">${bi("合计","Totals")}</h2>
+   <div class="panel"><div class="pb"><table class="tbl"><tbody>
+    <tr><td>${S.lang === "en" ? "Seated in auditorium" : "礼堂座位人数"}</td><td class="n">${st}</td></tr>
+    <tr><td>${S.lang === "en" ? "Children's church + nursery" : "儿童主日学 + 婴幼儿室"}</td><td class="n">${e.child + e.nursery}</td></tr>
+    <tr><td>${S.lang === "en" ? "Serving team not seated" : "服事同工（未入座）"}</td><td class="n">${e.serving}</td></tr>
+    <tr><td>${S.lang === "en" ? "Standing / extra chairs" : "站立 / 加座"}</td><td class="n">${e.standing}</td></tr>
+    <tr class="tot"><td>${S.lang === "en" ? "Total on-site" : "现场总人数"}</td><td class="n">${onsite()}</td></tr>
+    <tr><td style="color:var(--ink-3)">${S.lang === "en" ? "Online (separate)" : "线上参与（另计）"}</td>
+      <td class="n" style="color:var(--ink-3)">${e.online}</td></tr>
+   </tbody></table></div></div>`;
+
+  h += `<h2 class="sec">${bi("送出与存档","Send &amp; file")}</h2>
+   <div class="twocol">
+     <div class="panel"><div class="pt"><strong>${bi("WhatsApp 报告","WhatsApp report")}</strong></div>
+       <div class="pb"><pre class="out">${esc(waText())}</pre>
+       <div class="btnrow"><button class="btn pri" id="cp-wa">${bi("复制报告","Copy report")}</button></div></div></div>
+     <div class="panel"><div class="pt"><strong>${bi("存入记录 / 导出","Save &amp; export")}</strong></div>
+       <div class="pb"><p class="hint" style="margin:0 0 9px">${bi("存档后可在「记录」看趋势，也可导出 CSV 贴进 Google Sheet。",
+         "Saving files it under History; export CSV to paste into your Google Sheet.")}</p>
+       <div class="btnrow">
+         <button class="btn pri" id="save-hist">${bi("存入记录","Save to history")}</button>
+         <button class="btn" id="cp-csv">${bi("复制这次 CSV","Copy this CSV row")}</button>
+         <button class="btn gh" id="reset-draft">${bi("清空重来","Clear count")}</button>
+       </div></div></div>
+   </div>`;
+  return h;
+}
+
+function waText(){
+  const d = S.draft, e = d.extras, st = seated();
+  const L = [];
+  L.push("【" + (S.lang === "en" ? "COOS attendance" : "COOS 主日人数") + "】");
+  L.push((d.date || "") + "  " + (d.svc || "").split(" · ")[0] + (d.time ? "  @" + d.time : ""));
+  L.push("礼堂座位 Seated: " + st + " / 1176 (" + Math.round(st / CAP_TOTAL * 100) + "%)");
+  L.push("  · 一楼 L1: " + levelSum("L1") + " / 836");
+  L.push("  · 二楼 L2: " + levelSum("L2") + " / 340");
+  if(e.child) L.push("儿童主日学 Children: " + e.child);
+  if(e.nursery) L.push("婴幼儿室 Nursery: " + e.nursery);
+  if(e.serving) L.push("服事同工 Serving: " + e.serving);
+  if(e.standing) L.push("站立/加座 Standing: " + e.standing);
+  L.push("现场总人数 Total on-site: " + onsite());
+  if(e.online) L.push("线上 Online: " + e.online);
+  if(d.by) L.push("点算 Counted by: " + d.by);
+  if(d.note) L.push("备注 Note: " + d.note);
+  return L.join("\n");
+}
+const CSV_HEAD = ["date","service","count_at","seated","level1","level2","capacity_pct"]
+  .concat(SECTIONS.map(s => s.key))
+  .concat(["children","nursery","serving","standing","total_onsite","online","counted_by","note"]).join(",");
+function csvRow(rec){
+  const d = rec || {date:S.draft.date, svc:S.draft.svc, time:S.draft.time, by:S.draft.by,
+    seated:seated(), lvL1:levelSum("L1"), lvL2:levelSum("L2"),
+    sec:SECTIONS.reduce((o,s) => (o[s.key] = secVal(s.key), o), {}),
+    extras:S.draft.extras, note:S.draft.note};
+  const e = d.extras || {}, sec = d.sec || {};
+  const tot = (d.seated || 0) + (e.child || 0) + (e.nursery || 0) + (e.serving || 0) + (e.standing || 0);
+  const cells = [d.date, d.svc, d.time, d.seated, d.lvL1 == null ? "" : d.lvL1, d.lvL2 == null ? "" : d.lvL2,
+      Math.round((d.seated || 0) / CAP_TOTAL * 100)]
+    .concat(SECTIONS.map(s => sec[s.key] == null ? "" : sec[s.key]))
+    .concat([e.child || 0, e.nursery || 0, e.serving || 0, e.standing || 0, tot, e.online || 0,
+      d.by || "", d.note || ""]);
+  return cells.map(c => {
+    const s2 = String(c == null ? "" : c);
+    return /[",\n]/.test(s2) ? '"' + s2.replace(/"/g,'""') + '"' : s2;
+  }).join(",");
+}
+
+/* ============================================================
+   HISTORY
+   ============================================================ */
+function viewHistory(){
+  const hs = S.history.slice().sort((a,b) => (a.date < b.date ? 1 : -1));
+  if(!hs.length) return `<h2 class="sec">${bi("记录","History")}</h2><div class="panel"><div class="pb">
+    <p class="hint" style="margin:0">${bi("还没有存档的点算。在「总结」页按「存入记录」即可。",
+      "No counts saved yet — use “Save to history” on the Summary tab.")}</p></div></div>`;
+  const last = hs.slice(0, 14).reverse();
+  const mx = Math.max.apply(null, last.map(r => r.seated).concat([300]));
+  const H = 40, bw = 100 / last.length;
+  const bars = last.map((r,i) => {
+    const bh = r.seated / mx * (H - 9);
+    return `<rect x="${(i * bw + bw * .16).toFixed(2)}" y="${(H - bh).toFixed(2)}" width="${(bw * .68).toFixed(2)}"
+      height="${bh.toFixed(2)}" rx="0.6" fill="var(--accent)" opacity="${r.demo ? .38 : .9}"></rect>`;
+  }).join("");
+  const avg = Math.round(last.reduce((t,r) => t + r.seated, 0) / last.length);
+  const avgY = H - avg / mx * (H - 9);
+  let h = `<h2 class="sec">${bi("礼堂座位人数趋势","Seated attendance trend")}
+      <span class="chip">${S.lang === "en" ? "avg" : "平均"} ${avg}</span></h2>
+    <div class="panel"><div class="pb">
+      <svg class="trend" viewBox="0 0 100 52" preserveAspectRatio="none" role="img"
+        aria-label="Seated attendance for the last ${last.length} counts, average ${avg}">
+        <line x1="0" y1="${H}" x2="100" y2="${H}" stroke="var(--line)" stroke-width=".3"></line>
+        <line x1="0" y1="${avgY.toFixed(2)}" x2="100" y2="${avgY.toFixed(2)}" stroke="var(--ink-3)"
+          stroke-width=".3" stroke-dasharray="1.4 1.4"></line>
+        ${bars}
+        <text x="0" y="49" fill="var(--ink-3)" font-size="3.4" font-family="IBM Plex Mono, monospace">${last[0].date.slice(5)}</text>
+        <text x="100" y="49" fill="var(--ink-3)" font-size="3.4" text-anchor="end" font-family="IBM Plex Mono, monospace">${last[last.length - 1].date.slice(5)}</text>
+        <text x="0" y="6" fill="var(--ink-3)" font-size="3.4" font-family="IBM Plex Mono, monospace">${S.lang === "en" ? "peak" : "最高"} ${mx}</text>
+      </svg>
+      <p class="hint" style="margin:9px 0 0">${bi("虚线为这 " + last.length + " 次的平均 " + avg + " 人。",
+        "Dashed line = average of these " + last.length + " counts (" + avg + ").")}</p>
+    </div></div>`;
+  h += `<h2 class="sec">${bi("每次点算","Each count")}</h2><div class="panel"><div class="pb"><div class="hlist">` +
+    hs.map(r => `<div class="hitem">
+      <div class="d">${r.date}</div>
+      <div class="s">${esc((r.svc || "").split(" · ")[0])}${r.demo ? " · " + (S.lang === "en" ? "example" : "示例") : ""}</div>
+      <div class="v">${r.seated}</div><div class="p">${Math.round(r.seated / CAP_TOTAL * 100)}%</div>
+      <button class="mini" data-del="${esc(r.id)}" aria-label="delete">✕</button></div>`).join("") +
+    `</div><div class="btnrow"><button class="btn pri" id="cp-all">${bi("复制全部 CSV","Copy all as CSV")}</button>
+      <button class="btn" id="dl-all">${bi("下载 CSV","Download CSV")}</button></div></div></div>`;
+  return h;
+}
+
+/* ============================================================
+   TAP COUNTER — a clicker on the phone, for whoever hasn't got one
+   ============================================================ */
+function viewTap(){
+  const t = S.draft.tap || 0;
+  return `<h2 class="sec">${bi("手机计数器","Tap counter")}</h2>
+   <div class="callout"><p>${bi("没带计数器时可以用这个：一边数一边按，数完选一个区，按「填进这一区」。平常用手上的计数器就好。",
+     "For when you haven't got a clicker: tap as you count, then pick a section and press “Put into section”. If you have a physical clicker, just use that.")}</p></div>
+   <div class="tapwrap">
+     <div class="n" id="tap-n">${t}</div>
+     <button class="tapbig" id="tap-add">+1</button>
+     <div class="btnrow" style="justify-content:center;margin:0">
+       <button class="btn" id="tap-sub">−1</button>
+       <button class="btn" id="tap-add5">+5</button>
+       <button class="btn gh" id="tap-zero">${bi("归零","Reset")}</button>
+     </div>
+     <div class="sendrow">
+       <select id="tap-to" aria-label="${S.lang === "en" ? "section" : "区域"}">
+         <option value="">${S.lang === "en" ? "— pick a section —" : "— 选一个区 —"}</option>
+         ${SECTIONS.map(s => `<option value="${s.key}"${S.draft.tapTo === s.key ? " selected" : ""}>${S.lang === "en" ? s.en : s.zh} (${s.cap})</option>`).join("")}
+       </select>
+       <button class="btn pri" id="tap-put">${bi("填进这一区","Put into section")}</button>
+     </div>
+   </div>`;
+}
+
+/* ============================================================
+   HELP
+   ============================================================ */
+function viewHelp(){
+  return `<h2 class="sec">${bi("做法","The method")}</h2>
+  <div class="prose">
+    <div class="callout"><p>${bi("做法很简单：用你手上的计数器数完一区，把那个数字填进 App 的那一格。App 会自动加总，算出这个主日的出席人数。",
+      "The method is simple: count one section with your clicker, type that number into its box in the app. The app adds them all up into this Sunday's attendance.")}</p></div>
+    <h3><span class="zh">一、每周同一时刻点算</span><span class="en">1. Count at the same moment every week</span></h3>
+    <p>${bi("讲道开始后 5 分钟。那时迟到的人已入座，出去的人还没走。填在「点算时间」栏，每周一致，数字才可比较。",
+      "Five minutes into the sermon. Latecomers are seated by then and nobody has left yet. Record it in the “Count at” field — consistency is what makes weeks comparable.")}</p>
+    <h3><span class="zh">二、一位招待，分三遍</span><span class="en">2. One usher, three passes</span></h3>
+    <p>${bi("先站在二楼栏杆旁点算一楼看得见的五区；再走下去点算看台正下方那四区；最后回到二楼点算这一层的三区。一共十二个数字。",
+      "First, from the balcony rail, count the five Level 1 sections you can see. Then walk down for the four sections tucked under the balcony. Finally count the three sections on Level 2 itself. Twelve numbers in all.")}</p>
+    <h3><span class="zh">三、快满的区改数空椅子</span><span class="en">3. On a full section, count the empty chairs</span></h3>
+    <p>${bi("一区 168 个座位坐了 160 人 —— 数 8 张空椅子比数 160 个人快得多，也不易错。按该区的「数空位」，填空椅子数量，App 自动换算成人数。",
+      "A section of 168 seats with 160 people — counting 8 empty chairs is far faster and safer than counting 160 heads. Tap “Empties” on that section, enter the empty chairs, and the app converts it.")}</p>
+    <h3><span class="zh">四、每月找第二个人核对一次</span><span class="en">4. Have a second person check once a month</span></h3>
+    <p>${bi("一个人点算，就没有第二个数字可以对照。每月请另一位招待在同一时刻独立数一遍，两人相差超过 3% 就一起检讨做法 —— 通常是前几排从二楼数错了。",
+      "With one counter there is no second number to check against. Once a month, ask another usher to count independently at the same moment. If the two differ by more than 3%, review the method together — it is usually the front rows, misread from the balcony.")}</p>
+    <h3><span class="zh">五、礼堂人数不等于出席人数</span><span class="en">5. Seated is not the same as attendance</span></h3>
+    <p>${bi("儿童主日学、婴幼儿室、正在服事的同工都不在座位上。在「总结」页分开填，得出「现场总人数」。线上参与另列，不要混进现场数字。",
+      "Children's church, the nursery, and the serving team are not in seats. Enter them separately on the Summary tab to get “Total on-site”. Keep online participation on its own line — never fold it into the on-site figure.")}</p>
+    <h3><span class="zh">六、存档，并贴进 Google Sheet</span><span class="en">6. File it, then paste into your Google Sheet</span></h3>
+    <p>${bi("每次按「存入记录」，「记录」页就能看趋势。数据只存在这台手机里 —— 请每周导出 CSV 贴进 Google Sheet，那才是真正的存档。",
+      "Press “Save to history” each week and the History tab shows the trend. The data lives only on this phone, so export the CSV into your Google Sheet each week — that is the real archive.")}</p>
+  </div>
+  <h2 class="sec">${bi("十二个区","The twelve sections")}</h2>
+  <div class="panel"><div class="pb" style="overflow-x:auto"><table class="tbl">
+    <thead><tr><th>${S.lang === "en" ? "Pass" : "遍"}</th><th>${S.lang === "en" ? "Section" : "区域"}</th>
+      <th class="n">${S.lang === "en" ? "Seats" : "座位"}</th></tr></thead><tbody>` +
+    [1,2,3].map(pn => {
+      const ss = SECTIONS.filter(s => passOf(s) === pn);
+      return ss.map((s,i) => `<tr><td>${i === 0 ? pn : ""}</td>
+        <td>${S.lang === "en" ? s.en : s.zh} <span style="color:var(--ink-3);font-family:var(--mono);font-size:11px">${s.key}</span></td>
+        <td class="n">${s.cap}</td></tr>`).join("") +
+        `<tr><td></td><td style="font-weight:600">${S.lang === "en" ? "Pass " + pn + " total" : "第 " + pn + " 遍合计"}</td>
+         <td class="n" style="font-weight:600">${ss.reduce((t,s) => t + s.cap, 0)}</td></tr>`;
+    }).join("") +
+    `<tr class="tot"><td></td><td>${S.lang === "en" ? "Whole auditorium" : "全场座位"}</td><td class="n">1176</td></tr>
+    </tbody></table></div></div>
+  <h2 class="sec">${bi("座位数依据","Seat figures")}</h2>
+  <div class="prose"><p>${bi("每一区的座位数由平面图上逐排的座位数加总而得：《Floor Plan of Main Auditorium》（2022-8-25 更新），一楼 836 + 二楼 340 = 1176，与图上印的总数完全相符。礼堂没有 I 排，J 排接在 H 排后面；U 排只出现在右侧区。若日后重新排椅，请告诉我更新。",
+    "Every section capacity is the sum of the per-row seat counts on “Floor Plan of Main Auditorium” (updated 2022-08-25): Level 1 836 + Level 2 340 = 1176, reconciling exactly with the totals printed on the plan. There is no row I — J follows H; row U appears only in the right-side block. If the chairs are ever re-laid out, say so and these can be updated.")}</p></div>
+  <div class="btnrow"><button class="btn gh" id="wipe">${bi("清除本机所有数据","Erase all data on this device")}</button></div>`;
+}
+
+/* ============================================================
+   RENDER + EVENTS
+   ============================================================ */
+function renderView(){
+  $("#view").innerHTML =
+      S.tab === "count"   ? viewCount()
+    : S.tab === "map"     ? viewMap()
+    : S.tab === "summary" ? viewSummary()
+    : S.tab === "history" ? viewHistory()
+    : S.tab === "tap"     ? viewTap()
+    :                       viewHelp();
+  wireView();
+}
+function renderAll(){
+  document.documentElement.setAttribute("data-lang", S.lang);
+  $("#langsw").querySelectorAll("button").forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.l === S.lang)));
+  $("#f-date").value = S.draft.date || todayISO();
+  $("#f-time").value = S.draft.time || "";
+  $("#f-by").value = S.draft.by || "";
+  $("#f-svc").innerHTML = S.services.map(x =>
+    `<option${x === S.draft.svc ? " selected" : ""}>${esc(x)}</option>`).join("");
+  renderBand(); renderTabs(); renderDemo(); renderView();
+}
+function touch(rerender){
+  S.demo = false; save(); renderBand();
+  if(rerender !== false) renderView();
+}
+
+function wireView(){
+  const V = $("#view");
+  const on = (sel, fn) => { const el = $(sel); if(el) el.onclick = fn; };
+
+  // section number entry
+  V.querySelectorAll("[data-secin]").forEach(inp => {
+    inp.oninput = () => {
+      setSec(inp.dataset.secin, inp.value);
+      S.demo = false; save(); renderBand();
+    };
+    inp.onblur = () => renderView();
+    inp.onkeydown = ev => { if(ev.key === "Enter"){ inp.blur(); } };
+  });
+  V.querySelectorAll("[data-step]").forEach(b => {
+    b.onclick = () => {
+      const k = b.dataset.k, cur = secVal(k);
+      const shown = cur == null ? 0 : (S.draft.empties[k] ? capOf(k) - cur : cur);
+      setSec(k, Math.max(0, shown + (+b.dataset.step)));
+      touch();
+    };
+  });
+  V.querySelectorAll("[data-act]").forEach(b => {
+    b.onclick = () => {
+      const k = b.dataset.k, a = b.dataset.act;
+      if(a === "zero") S.draft.counts[k] = 0;
+      if(a === "full") S.draft.counts[k] = capOf(k);
+      if(a === "clr")  S.draft.counts[k] = null;
+      if(a === "emp")  S.draft.empties[k] = !S.draft.empties[k];
+      if(a === "hid")  S.hidden[k] = !S.hidden[k];
+      touch();
+    };
+  });
+  // jump from the floor map to a section's input
+  V.querySelectorAll("[data-goto]").forEach(b => {
+    b.onclick = () => {
+      const k = b.dataset.goto;
+      S.tab = "count"; save(); renderTabs(); renderView();
+      const inp = $('[data-secin="' + k + '"]');
+      if(inp){ inp.scrollIntoView({block:"center", behavior:"smooth"}); inp.focus(); inp.select(); }
+    };
+  });
+
+  on("#cp-code", () => copy(makeCode(), "数字已复制", "Numbers copied"));
+  on("#do-merge", () => {
+    const r = mergeCode($("#mergebox").value);
+    if(!r.ok){ toast("看不懂这段文字", "That text wasn't recognised"); return; }
+    save(); renderAll(); toast("已合并 " + r.n + " 区", "Merged " + r.n + " section(s)");
+  });
+  on("#cp-wa", () => copy(waText(), "报告已复制", "Report copied"));
+  on("#cp-csv", () => copy(CSV_HEAD + "\n" + csvRow(null), "CSV 已复制", "CSV copied"));
+  on("#save-hist", () => {
+    const d = S.draft;
+    S.history.push({id:d.date + "|" + Date.now(), date:d.date, svc:d.svc, time:d.time, by:d.by,
+      seated:seated(), lvL1:levelSum("L1"), lvL2:levelSum("L2"),
+      sec:SECTIONS.reduce((o,s) => (o[s.key] = secVal(s.key), o), {}),
+      extras:Object.assign({}, d.extras), note:d.note, saved:new Date().toISOString()});
+    S.demo = false; save(); renderBand();
+    toast("已存入记录", "Saved to history");
+  });
+  on("#reset-draft", () => {
+    if(!confirm(S.lang === "en" ? "Clear this count? Saved history is kept."
+      : "清空这次点算？已存档的记录不受影响。")) return;
+    S.draft = freshDraft(S.draft.svc, S.draft.by);
+    S.demo = false; save(); renderAll();
+  });
+
+  V.querySelectorAll("[data-ex]").forEach(b => {
+    b.onclick = () => {
+      const k = b.dataset.ex;
+      S.draft.extras[k] = Math.max(0, (S.draft.extras[k] || 0) + (+b.dataset.d));
+      touch();
+    };
+  });
+  V.querySelectorAll("[data-exin]").forEach(i => {
+    i.onchange = () => {
+      S.draft.extras[i.dataset.exin] = Math.max(0, parseInt(i.value, 10) || 0);
+      touch();
+    };
+  });
+  const nb = $("#notebox");
+  if(nb) nb.oninput = () => { S.draft.note = nb.value; save(); };
+
+  V.querySelectorAll("[data-del]").forEach(b => {
+    b.onclick = () => { S.history = S.history.filter(r => r.id !== b.dataset.del); save(); renderView(); };
+  });
+  on("#cp-all", () => copy(CSV_HEAD + "\n" + S.history.map(r => csvRow(r)).join("\n"),
+    "全部记录已复制", "All counts copied"));
+  on("#dl-all", async () => {
+    // BOM keeps the Chinese readable when the CSV is opened in Excel.
+    const csv = "﻿" + CSV_HEAD + "\n" + S.history.map(r => csvRow(r)).join("\n");
+    const dl = await (window.claude && window.claude.use ? window.claude.use("downloads") : null);
+    if(dl){
+      try{ await dl.save({filename:"coos-attendance.csv", data:csv}); toast("已下载", "Downloaded"); return; }
+      catch(e){ /* fall through */ }
+    }
+    if(blobSave("coos-attendance.csv", csv)){ toast("已下载", "Downloaded"); return; }
+    copy(csv, "无法下载，已复制到剪贴板", "Download unavailable — copied instead");
+  });
+
+  // tap counter
+  const bump = n => {
+    S.draft.tap = Math.max(0, (S.draft.tap || 0) + n);
+    const el = $("#tap-n"); if(el) el.textContent = S.draft.tap;
+    save();
+  };
+  on("#tap-add", () => bump(1)); on("#tap-sub", () => bump(-1)); on("#tap-add5", () => bump(5));
+  on("#tap-zero", () => { S.draft.tap = 0; const el = $("#tap-n"); if(el) el.textContent = 0; save(); });
+  const sel = $("#tap-to");
+  if(sel) sel.onchange = () => { S.draft.tapTo = sel.value; save(); };
+  on("#tap-put", () => {
+    const k = sel ? sel.value : "";
+    if(!k){ toast("请先选一个区", "Pick a section first"); return; }
+    S.draft.counts[k] = S.draft.tap || 0;
+    S.draft.empties[k] = false;
+    S.draft.tap = 0; S.demo = false; save();
+    S.tab = "count"; renderTabs(); renderBand(); renderView();
+    toast("已填进 " + SMAP[k].zh, "Put into " + SMAP[k].en);
+  });
+
+  on("#wipe", () => {
+    if(!confirm(S.lang === "en" ? "Erase every count stored on this device? This cannot be undone."
+      : "清除本机所有点算数据？无法复原。")) return;
+    try{ localStorage.removeItem(STORE); }catch(e){}
+    S = null; load();
+    S.demo = false; S.draft = freshDraft(); S.history = [];
+    save(); renderAll();
+  });
+}
+
+/* ---------- context fields ---------- */
+$("#f-date").onchange = e => { S.draft.date = e.target.value; save(); };
+$("#f-time").onchange = e => { S.draft.time = e.target.value; save(); };
+$("#f-by").oninput   = e => { S.draft.by = e.target.value; save(); };
+$("#f-svc").onchange = e => { S.draft.svc = e.target.value; save(); };
+$("#langsw").addEventListener("click", ev => {
+  const b = ev.target.closest("button[data-l]"); if(!b) return;
+  S.lang = b.dataset.l; save(); renderAll();
+});
+
+renderAll();
+</script>
+</body>
+</html>
