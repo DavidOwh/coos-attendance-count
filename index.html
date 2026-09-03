@@ -307,6 +307,23 @@ pre.out{background:var(--sunken);border:1px solid var(--line);border-radius:8px;
 .callout{border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0;
   padding:10px 13px;margin:0 0 14px}
 .callout p{margin:0;color:var(--ink)}
+.ssheet{position:fixed;left:0;right:0;bottom:0;z-index:70;background:var(--surface);color:var(--ink);
+  border-top:5px solid var(--gc,var(--accent));box-shadow:0 -14px 44px -16px rgba(0,0,0,.7);
+  padding:13px 14px calc(15px + env(safe-area-inset-bottom));transform:translateY(103%);
+  transition:transform .2s cubic-bezier(.2,.8,.2,1)}
+.ssheet.open{transform:translateY(0)}
+.ssheet-in{max-width:620px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.ss-hd{display:flex;align-items:flex-start;gap:10px}
+.ss-num{flex:0 0 auto;width:40px;height:40px;border-radius:10px;background:var(--gc,var(--accent));
+  color:#fff;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:21px;
+  font-variant-numeric:tabular-nums}
+.ss-nm{font-weight:700;font-size:17px;letter-spacing:-.01em}
+.ss-sub{font-family:var(--mono);font-size:12px;color:var(--ink-2);margin-top:2px}
+.ss-x{border:1px solid var(--line);background:var(--surface-2);border-radius:8px;width:34px;height:34px;
+  cursor:pointer;font-size:15px;color:var(--ink-2);flex:0 0 auto}
+.ss-x:hover{background:var(--sunken);color:var(--ink)}
+.ss-ft{display:flex;gap:8px;align-items:center}
+.ss-ft .hint{flex:1;text-align:center;font-family:var(--mono);font-variant-numeric:tabular-nums}
 .toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,26px);z-index:90;background:#fff;
   color:var(--ink);box-shadow:0 8px 28px rgba(0,0,0,.55);padding:8px 15px;border-radius:999px;font-size:12.5px;opacity:0;pointer-events:none;
   transition:opacity .16s ease,transform .16s ease}
@@ -363,6 +380,31 @@ pre.out{background:var(--sunken);border:1px solid var(--line);border-radius:8px;
 <div class="wrap">
   <div id="demo-banner"></div>
   <main id="view"></main>
+</div>
+
+<div class="ssheet" id="ssheet" role="dialog" aria-modal="false" aria-label="Enter a section count">
+  <div class="ssheet-in">
+    <div class="ss-hd">
+      <div class="ss-num" id="ss-num">1</div>
+      <div style="flex:1;min-width:0">
+        <div class="ss-nm" id="ss-nm"></div>
+        <div class="ss-sub" id="ss-sub"></div>
+      </div>
+      <div id="ss-loc"></div>
+      <button class="ss-x" id="ss-close" aria-label="close">✕</button>
+    </div>
+    <div class="entry">
+      <button class="stepbtn" id="ss-minus" aria-label="one fewer">−</button>
+      <input type="number" inputmode="numeric" min="0" id="ss-input">
+      <button class="stepbtn" id="ss-plus" aria-label="one more">+</button>
+    </div>
+    <div class="bar"><i id="ss-bar"></i></div>
+    <div class="ss-ft">
+      <button class="btn" id="ss-clear"><span class="zh">清除</span><span class="en">Clear</span></button>
+      <div class="hint" id="ss-pc"></div>
+      <button class="btn pri" id="ss-next"><span class="zh">下一区</span><span class="en">Next</span> →</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -508,7 +550,7 @@ function load(){
   try{ const raw = localStorage.getItem(STORE); if(raw) S = JSON.parse(raw); }
   catch(e){ S = null; }
   if(!S || !S.draft){
-    S = {lang:"both", tab:"count", demo:true, services:SERVICES_DEFAULT.slice(),
+    S = {lang:"both", tab:"map", demo:true, services:SERVICES_DEFAULT.slice(),
          hidden:{}, draft:demoDraft(), history:demoHistory()};
     // Carry across anything already filed under the previous version. History
     // records store totals, not per-section numbers, so they transfer cleanly.
@@ -609,8 +651,8 @@ function renderBand(){
 
 /* ---------- tabs ---------- */
 const TABS = [
-  {id:"count",   zh:"点算",     en:"Count"},
-  {id:"map",     zh:"座位图",   en:"Floor map"},
+  {id:"map",     zh:"座位图 · 点算", en:"Floor map"},
+  {id:"count",   zh:"清单",     en:"List"},
   {id:"summary", zh:"总结",     en:"Summary"},
   {id:"history", zh:"记录",     en:"History"},
   {id:"tap",     zh:"手机计数器",en:"Tap counter"},
@@ -843,7 +885,7 @@ function drawPlan(P, title, sub){
     const rs = bx[1] - bx[0] + 1, cs = bx[3] - bx[2] + 1;
     const fs = Math.max(13, Math.min(42, Math.min(cs * COLW, rs * ROWH) * 0.62));
     const col = fillFor(sec).fg === "#fff" ? "rgba(255,255,255,.92)" : "rgba(21,14,16,.5)";
-    h += `<div class="tpnum" style="grid-column:${gc}/span ${cs};grid-row:${gr}/span ${rs};
+    h += `<div class="tpnum" data-num="${key}" style="grid-column:${gc}/span ${cs};grid-row:${gr}/span ${rs};
       font-size:${fs.toFixed(0)}px;color:${col}">${sec.n}</div>`;
   });
   h += `</div><div class="legend">` + Object.keys(GROUPS).map(g =>
@@ -856,8 +898,8 @@ function viewMap(){
     + drawPlan(PLAN.l1, "Main Auditorium", "Level 1 · " + levelSum("L1") + "/836")
     + `<h2 class="sec">${bi("二楼 副堂 · 340 座","Level 2 · Upper · 340 seats")}<span class="chip">${levelSum("L2")}</span></h2>`
     + drawPlan(PLAN.l2, "Upper Auditorium", "Level 2 · " + levelSum("L2") + "/340")
-    + `<p class="hint" style="margin:12px 0 0">${bi("这就是礼堂平面图本身，每一格是一个座位。方框上的号码就是区号 —— 一楼 1 到 17 区，二楼 18 到 22 区。颜色是整区的密度。点任何一个座位就跳去填那一区的数字。",
-        "This is the floor plan itself, one cell per seat. The number printed on each block is its section number — 1 to 17 downstairs, 18 to 22 upstairs. The colour shows how full it is. Tap any seat to jump to that section's number.")}</p>`;
+    + `<p class="hint" style="margin:12px 0 0">${bi("<b>数完一区，就在这张图上点那一区，直接填数字</b> —— 不用离开这一页。方框上的号码就是区号：一楼 1 到 17 区，二楼 18 到 22 区。填好的区颜色会变深。",
+        "<b>Count a section, then tap it on this plan and type the number right here</b> — you never leave this page. The number on each block is its section number: 1 to 17 downstairs, 18 to 22 upstairs. A section darkens as it fills.")}</p>`;
 }
 
 /* ============================================================
@@ -1154,7 +1196,11 @@ function wireView(){
     }
     if(inp){ inp.focus(); inp.select(); }
   };
-  V.querySelectorAll("[data-goto]").forEach(b => { b.onclick = () => goTo(b.dataset.goto); });
+  // On the plan, tapping a block opens the entry sheet over it. In the list
+  // view the inputs are already inline, so a tap there just scrolls.
+  V.querySelectorAll("[data-goto]").forEach(b => {
+    b.onclick = () => { if(S.tab === "map") openSheet(b.dataset.goto); else goTo(b.dataset.goto); };
+  });
   V.querySelectorAll("[data-jump]").forEach(b => { b.onclick = () => goTo(b.dataset.jump); });
 
   on("#cp-code", () => copy(makeCode(), "数字已复制", "Numbers copied"));
@@ -1242,6 +1288,105 @@ function wireView(){
     save(); renderAll();
   });
 }
+
+/* ---------- entry sheet, driven from the floor plan ---------- */
+let SS = null;
+
+/* Repaint one section's cells in place, so the plan updates behind the sheet
+   without a re-render that would close the keyboard. */
+function paintSection(key){
+  const sec = SMAP[key];
+  if(!sec) return;
+  const f = fillFor(sec);
+  document.querySelectorAll('[data-goto="' + key + '"]').forEach(el => {
+    el.style.setProperty("--bg", f.bg);
+    el.style.setProperty("--fg", f.fg);
+  });
+  document.querySelectorAll('[data-num="' + key + '"]').forEach(el => {
+    el.style.color = f.fg === "#fff" ? "rgba(255,255,255,.92)" : "rgba(21,14,16,.5)";
+  });
+}
+
+function ssPaint(){
+  const sec = SMAP[SS];
+  const v = secVal(SS), cap = sec.cap;
+  $("#ss-bar").style.width = (v == null ? 0 : Math.min(100, v / cap * 100)) + "%";
+  $("#ss-bar").style.background = groupColor(sec);
+  $("#ss-pc").textContent = v == null
+    ? (S.lang === "en" ? "not counted yet" : "还没填")
+    : v + " / " + cap + " · " + Math.round(v / cap * 100) + "%";
+  paintSection(SS);
+  renderBand();
+}
+
+function openSheet(key){
+  const sec = SMAP[key];
+  if(!sec) return;
+  SS = key;
+  const sh = $("#ssheet");
+  sh.style.setProperty("--gc", groupColor(sec));
+  $("#ss-num").textContent = sec.n;
+  $("#ss-nm").innerHTML = '<span class="zh">' + sec.zh + '</span><span class="en">' + sec.en + "</span>";
+  $("#ss-sub").textContent = GROUPS[sec.grp][S.lang === "en" ? "en" : "zh"]
+    + " · " + sec.cap + (S.lang === "en" ? " seats" : " 座");
+  $("#ss-loc").innerHTML = locator(sec);
+  const inp = $("#ss-input");
+  inp.value = secVal(key) == null ? "" : secVal(key);
+  inp.placeholder = S.lang === "en" ? "people" : "人数";
+  ssPaint();
+  sh.classList.add("open");
+  setTimeout(() => { inp.focus(); inp.select(); }, 60);
+}
+function closeSheet(){
+  $("#ssheet").classList.remove("open");
+  SS = null;
+  renderView();
+}
+$("#ss-close").onclick = closeSheet;
+$("#ss-input").oninput = () => {
+  if(!SS) return;
+  setSec(SS, $("#ss-input").value);
+  S.demo = false; save(); ssPaint();
+};
+$("#ss-input").onkeydown = ev => { if(ev.key === "Enter") $("#ss-next").click(); };
+$("#ss-minus").onclick = () => {
+  if(!SS) return;
+  const cur = secVal(SS);
+  setSec(SS, Math.max(0, (cur == null ? 0 : cur) - 1));
+  $("#ss-input").value = secVal(SS);
+  S.demo = false; save(); ssPaint();
+};
+$("#ss-plus").onclick = () => {
+  if(!SS) return;
+  const cur = secVal(SS);
+  setSec(SS, (cur == null ? 0 : cur) + 1);
+  $("#ss-input").value = secVal(SS);
+  S.demo = false; save(); ssPaint();
+};
+$("#ss-clear").onclick = () => {
+  if(!SS) return;
+  S.draft.counts[SS] = null;
+  $("#ss-input").value = "";
+  S.demo = false; save(); ssPaint();
+  $("#ss-input").focus();
+};
+$("#ss-next").onclick = () => {
+  if(!SS) return;
+  const i = SECTIONS.findIndex(x => x.key === SS);
+  // Prefer the next section still missing a number, so the sheet walks the
+  // outstanding ones. Once everything is in, fall back to plain next, so
+  // this stays a way to move around and correct a figure.
+  for(let k = 1; k <= SECTIONS.length; k++){
+    const cand = SECTIONS[(i + k) % SECTIONS.length];
+    if(!secDone(cand.key)){ openSheet(cand.key); return; }
+  }
+  const done = doneCount() === SECTIONS.length;
+  openSheet(SECTIONS[(i + 1) % SECTIONS.length].key);
+  if(done) toast("全部区都填好了", "Every section is in");
+};
+document.addEventListener("keydown", ev => {
+  if(SS && ev.key === "Escape") closeSheet();
+});
 
 /* ---------- context fields ---------- */
 $("#f-date").onchange = e => { S.draft.date = e.target.value; save(); };
