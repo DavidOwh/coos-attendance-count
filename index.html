@@ -222,7 +222,8 @@ details.fold>.fb{padding:12px 13px 13px;border-top:1px solid var(--line)}
 .sbox-hd .nm{display:block;font-weight:700;font-size:13px;line-height:1.25;letter-spacing:-.01em}
 .sbox-hd .rg{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-2);margin-top:1px}
 .sbox-hd .v{display:block;font-family:var(--mono);font-size:12px;font-weight:500;margin-top:2px}
-.sbox-rows{display:flex;flex-direction:column;gap:2px}
+.sbox-rows{display:flex;flex-direction:column;gap:2px;align-items:flex-start}
+.sbox-rows.alignend{align-items:flex-end}
 .rbar{height:16px;border-radius:3px;background-color:var(--bg);display:flex;align-items:center;
   padding-left:4px;box-shadow:inset 0 0 0 1px var(--tick);
   background-image:repeating-linear-gradient(90deg,transparent 0,transparent calc(100%/var(--n) - 1px),var(--tick) calc(100%/var(--n) - 1px),var(--tick) calc(100%/var(--n)))}
@@ -768,7 +769,9 @@ const L1_COLS = [
 const L2_COLS = [
   {block:"l2left", zh:"二楼左区", en:"Upper left",   max:16, flex:16},
   {block:"l2mid",  zh:"二楼中区", en:"Upper centre", max:15, flex:15},
-  {block:"l2right",zh:"二楼右区", en:"Upper right",  max:16, flex:16}
+  // A-E (11 seats) and F-K (16) both end at the same column in the plan,
+  // so this block's narrow front rows sit flush right, not left.
+  {block:"l2right",zh:"二楼右区", en:"Upper right",  max:16, flex:16, align:"end"}
 ];
 function heatFg(n, cap){
   if(n == null || n === 0) return "var(--ink-3)";
@@ -787,7 +790,7 @@ function rowRange(sec){
   if(all.length === 1) return all[0];
   return all[0] + "–" + all[all.length - 1];
 }
-function sectionBox(sec, colMax){
+function sectionBox(sec, colMax, align){
   const v = secVal(sec.key), bg = heatVar(v, sec.cap), fg = heatFg(v, sec.cap);
   let bars = "";
   sec.parts.forEach(([block,labels]) => labels.split(" ").forEach(L => {
@@ -802,7 +805,7 @@ function sectionBox(sec, colMax){
       <span class="rg">${rowRange(sec)} · ${sec.cap}${S.lang === "en" ? "" : " 座"}</span>
       <span class="v" style="color:${v == null ? "var(--ink-3)" : "var(--accent)"}">${v == null ? (S.lang === "en" ? "not counted" : "未点算") : v + " " + (S.lang === "en" ? "people" : "人")}</span>
     </span>
-    <span class="sbox-rows">${bars}</span>
+    <span class="sbox-rows${align === "end" ? " alignend" : ""}">${bars}</span>
   </button>`;
 }
 function planFor(cols, title, sub, stageTop, zSection){
@@ -811,7 +814,7 @@ function planFor(cols, title, sub, stageTop, zSection){
   h += `<div class="cols">`;
   cols.forEach(c => {
     h += `<div class="col" style="flex:${c.flex} 1 0">` +
-      sectionsOfBlock(c.block).map(sec => sectionBox(sec, c.max)).join("") + `</div>`;
+      sectionsOfBlock(c.block).map(sec => sectionBox(sec, c.max, c.align)).join("") + `</div>`;
   });
   h += `</div>`;
   if(zSection) h += `<div class="zfull">${sectionBox(SMAP[zSection], 13)}</div>`;
@@ -1053,8 +1056,8 @@ function viewHelp(){
     `<tr class="tot"><td></td><td>${S.lang === "en" ? "Whole auditorium" : "全场座位"}</td><td class="n">1176</td></tr>
     </tbody></table></div></div>
   <h2 class="sec">${bi("座位数依据","Seat figures")}</h2>
-  <div class="prose"><p>${bi("每一区的座位数由平面图上逐排的座位数加总而得：《Floor Plan of Main Auditorium》（2022-8-25 更新），一楼 836 + 二楼 340 = 1176，与图上印的总数完全相符。礼堂没有 I 排，J 排接在 H 排后面；U 排只出现在右侧区。若日后重新排椅，请告诉我更新。",
-    "Every section capacity is the sum of the per-row seat counts on “Floor Plan of Main Auditorium” (updated 2022-08-25): Level 1 836 + Level 2 340 = 1176, reconciling exactly with the totals printed on the plan. There is no row I — J follows H; row U appears only in the right-side block. If the chairs are ever re-laid out, say so and these can be updated.")}</p></div>
+  <div class="prose"><p>${bi("座位数取自《Floor Plan of Main Auditorium》（2022-8-25 更新）的原始 Excel 档，已逐格核对全部 1176 个座位格：每一区、每一排的座位数完全相符。一楼 836 + 二楼 340 = 1176。礼堂没有 I 排，J 排接在 H 排后面；U 排只出现在右侧区。若日后重新排椅，请告诉我更新。",
+    "Seat counts come from the original Excel of “Floor Plan of Main Auditorium” (updated 2022-08-25), checked cell by cell against all 1176 seat cells: every section and every row matches exactly. Level 1 836 + Level 2 340 = 1176. There is no row I — J follows H; row U appears only in the right-side block. If the chairs are ever re-laid out, say so and these can be updated.")}</p></div>
   <div class="btnrow"><button class="btn gh" id="wipe">${bi("清除本机所有数据","Erase all data on this device")}</button></div>`;
 }
 
