@@ -101,6 +101,11 @@ button,input,select,textarea{font:inherit;color:inherit}
   text-transform:uppercase;color:var(--on-ground-2)}
 .field input,.field select{background:var(--surface);border:1px solid var(--line);border-radius:8px;
   padding:8px 9px;font-size:15px;min-width:0;max-width:100%}
+.timerow{display:flex;gap:5px;min-width:0}
+.timerow input{flex:1;min-width:0}
+.nowbtn{flex:0 0 auto;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--ink);
+  border-radius:8px;padding:0 10px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.nowbtn:hover{background:var(--sunken)}
 @media (max-height:620px){.band{position:static}}
 
 .readout{display:flex;align-items:center;gap:12px;margin:10px 0 9px;padding:11px 13px;
@@ -364,9 +369,12 @@ pre.out{background:var(--sunken);border:1px solid var(--line);border-radius:8px;
       <label><span class="zh">崇拜</span><span class="en">Service</span></label>
       <select id="f-svc"></select>
     </div>
-    <div class="field" style="flex:0 1 108px">
+    <div class="field" style="flex:0 1 168px">
       <label><span class="zh">点算时间</span><span class="en">Count at</span></label>
-      <input type="time" id="f-time">
+      <div class="timerow">
+        <input type="time" id="f-time">
+        <button class="nowbtn" id="f-now"><span class="zh">现在</span><span class="en">Now</span></button>
+      </div>
     </div>
     <div class="field" style="flex:1 1 118px">
       <label><span class="zh">点算人</span><span class="en">Counted by</span></label>
@@ -527,6 +535,10 @@ const STORE = "coos-count-v5";
 const OLD_STORE = "coos-count-v4";
 const SERVICES_DEFAULT = ["主日华语崇拜 2:00pm · Sunday Chinese Service"];
 const todayISO = () => new Date().toLocaleDateString("en-CA");
+const nowHM = () => {
+  const d = new Date();
+  return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+};
 
 function blankCounts(){ const c = {}; SECTIONS.forEach(s => c[s.key] = null); return c; }
 function blankExtras(){ const e = {}; EXTRAS.forEach(x => e[x.key] = 0); return e; }
@@ -674,6 +686,13 @@ function setSec(k, raw){
   let n = parseInt(t, 10);
   if(isNaN(n) || n < 0) n = 0;
   S.draft.counts[k] = n;
+  // The count time is the moment counting started; stamp it on the first
+  // entry so nobody has to open the phone's clock dialog at all.
+  if(!S.draft.time){
+    S.draft.time = nowHM();
+    const f = $("#f-time");
+    if(f) f.value = S.draft.time;
+  }
 }
 
 /* ---------- status band ---------- */
@@ -727,6 +746,7 @@ function renderNotice(){
           · ${bi("礼堂 " + st + " 人 · 现在误按也删不掉", st + " seated · a stray tap cannot wipe it now")}</div>
       </div>
       <button class="btn" id="nt-unlock">${bi("解锁修改","Unlock")}</button>
+      <button class="btn" id="nt-new">${bi("开始新一次点算","New count")}</button>
       <button class="btn pri" id="nt-copy">${bi("复制报告","Copy report")}</button>
     </div>`;
   } else if(S.demo){
@@ -1300,13 +1320,10 @@ function wireView(){
   on("#nt-unlock2", unlockCount);
   on("#reset-draft", () => {
     const n = doneCount();
-    if(!confirm(S.lang === "en"
+    if(n && !confirm(S.lang === "en"
       ? "Clear all " + n + " section counts and start a new count? Anything already submitted stays in History."
       : "清空全部 " + n + " 区的数字，开始新一次点算？已提交的记录仍留在「记录」里。")) return;
-    const snap = snapshot();
-    S.draft = freshDraft(S.draft.svc, S.draft.by);
-    S.demo = false; save(); renderAll();
-    toast("已清空", "Cleared", {zh:"撤销", en:"Undo", fn:() => restore(snap, "已恢复全部数字", "All numbers restored")});
+    startNewCount(todayISO());
   });
 
   V.querySelectorAll("[data-ex]").forEach(b => {
@@ -1373,6 +1390,20 @@ function wireView(){
   });
 }
 
+/* ---------- starting a fresh count ---------- */
+/* Keeps the service and the usher's name; everything else resets. Safe once
+   a count has been submitted, because that copy lives in History. */
+function startNewCount(date){
+  const snap = snapshot();
+  const wasSubmitted = LOCKED();
+  S.draft = freshDraft(S.draft.svc, S.draft.by);
+  if(date) S.draft.date = date;
+  S.demo = false; save(); renderAll();
+  if(wasSubmitted) toast("已开始新一次点算", "Started a new count");
+  else toast("已开始新一次点算", "Started a new count",
+             {zh:"撤销", en:"Undo", fn:() => restore(snap, "已恢复", "Restored")});
+}
+
 /* ---------- submitting locks the count ---------- */
 function submitCount(){
   const d = doneCount(), all = SECTIONS.length;
@@ -1409,6 +1440,13 @@ function wireNotice(){
   const sb = $("#nt-submit"); if(sb) sb.onclick = submitCount;
   const ub = $("#nt-unlock"); if(ub) ub.onclick = unlockCount;
   const cb = $("#nt-copy");   if(cb) cb.onclick = () => copy(waText(), "报告已复制", "Report copied");
+  const nb2 = $("#nt-new");
+  if(nb2) nb2.onclick = () => {
+    if(!confirm(S.lang === "en"
+      ? "Start a new count? This one is already saved in History."
+      : "开始新一次点算？这一次已经存进「记录」了。")) return;
+    startNewCount(todayISO());
+  };
 }
 
 /* ---------- entry sheet, driven from the floor plan ---------- */
@@ -1524,8 +1562,33 @@ document.addEventListener("keydown", ev => {
 });
 
 /* ---------- context fields ---------- */
-$("#f-date").onchange = e => { S.draft.date = e.target.value; save(); };
+$("#f-date").onchange = e => {
+  const nd = e.target.value, old = S.draft.date;
+  if(nd === old) return;
+  if(doneCount() > 0){
+    // A new date with the previous count still loaded is how last week's
+    // numbers would end up submitted against this week.
+    const ask = S.lang === "en"
+      ? "The date changed. Start a new count for " + nd + "?\n\nOK = clear the numbers and start fresh.\nCancel = keep the numbers on the new date."
+      : "日期改了。要为 " + nd + " 开始新一次点算吗？\n\n确定 = 清空数字，重新开始。\n取消 = 保留现在的数字，只改日期。";
+    if(confirm(ask)){ startNewCount(nd); return; }
+    if(LOCKED()){
+      // A submitted count belongs to its own date; don't let it be relabelled.
+      e.target.value = old;
+      toast("已提交的点算不能改日期，请先解锁或开始新一次",
+            "A submitted count keeps its date — unlock, or start a new count");
+      return;
+    }
+  }
+  S.draft.date = nd; save(); renderAll();
+};
 $("#f-time").onchange = e => { S.draft.time = e.target.value; save(); };
+$("#f-now").onclick = () => {
+  S.draft.time = nowHM();
+  $("#f-time").value = S.draft.time;
+  save(); renderNotice();
+  toast("点算时间已填 " + S.draft.time, "Count time set to " + S.draft.time);
+};
 $("#f-by").oninput   = e => { S.draft.by = e.target.value; save(); };
 $("#f-svc").onchange = e => { S.draft.svc = e.target.value; save(); };
 $("#langsw").addEventListener("click", ev => {
